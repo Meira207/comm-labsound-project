@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Plenty of Time · Seven days</title>
+  <meta name="description" content="A calm room, a computer, and seven days left until an exam. Page 1 of a simple interactive sound story.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+ 
+  <div id="beginScreen" class="begin-screen">
+    <p class="begin-project">Plenty of Time</p>
+    <h1 class="begin-title">Seven days</h1>
+    <p class="begin-sub">An exam is a week away. Plenty of time. Put your headphones on and take a seat.</p>
+    <button id="beginButton" type="button">Begin</button>
+  </div>
+
+
+  <main class="stage" id="stage">
+
+    <img
+      class="room-image"
+      src="media/room.png"
+      alt="A student's bedroom at dusk. He sits at a desk facing a computer. A tear-off calendar on the wall reads seven days to the exam."
+      draggable="false"
+    >
+
+    <video
+      id="gameVideo"
+      class="screen-video"
+      src="media/game.mp4"
+      muted
+      loop
+      playsinline
+      preload="auto"
+      aria-label="A simple arcade game playing on the computer screen"
+    ></video>
+
+    <!--  button over the computer (monitor + tower area) -->
+    <button
+      id="computerHotspot"
+      class="hotspot hotspot-computer"
+      type="button"
+      aria-label="Turn the computer on"
+      hidden
+    ></button>
+
+    <!-- button over the calendar -->
+    <button
+      id="calendarHotspot"
+      class="hotspot hotspot-calendar"
+      type="button"
+      aria-label="Tear off a page of the calendar"
+      hidden
+    ></button>
+
+    <div id="calendarNumber" class="calendar-number" aria-hidden="true">7</div>
+
+  </main>
+
+  <p id="caption" class="caption" aria-live="polite"></p>
+
+  <button id="promptButton" class="prompt" type="button" hidden></button>
+
+  <nav class="pager" aria-label="Pages">
+    <a href="index.html" aria-current="page">1 · Seven days</a>
+    <a href="page2.html">2 · Three days</a>
+    <a href="page3.html">3 · The night before</a>
+  </nav>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
