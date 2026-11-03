@@ -3,6 +3,8 @@ const RECORDINGS = {
   room: 'audio/Real_room_ambience.WAV',
   piano: 'audio/Piano_playing.m4a',
   paper: 'audio/calendar_sound.mp3',
+  book: 'audio/Real_page_flipping.WAV',
+  writing: 'audio/Writing.WAV',
   slowTyping: 'audio/Slow_typing.WAV',
   fastWriting: 'audio/Fast_writing.WAV',
   fastestWriting: 'audio/Fastest_writing.WAV',
@@ -31,6 +33,43 @@ let started = false;
 let tearing = false;
 let muted = false;
 let generation = 0;
+let studyStep = 0;
+let transitioning = false;
+const STUDY_STEPS = [
+  { id: 'bookHotspot', sound: 'book', volume: .25 },
+  { id: 'laptopHotspot', sound: 'slowTyping', volume: .28 },
+  { id: 'pencilHotspot', sound: 'writing', volume: .25 }
+];
+
+function updateStudyObjects(focusNext = false) {
+  STUDY_STEPS.forEach((step, index) => {
+    const active = started && day === 2 && !transitioning && index === studyStep;
+    $(step.id).disabled = !active;
+    $(step.id).dataset.active = String(active);
+  });
+  if (day !== 2) return;
+  $('calendarHotspot').disabled = studyStep !== STUDY_STEPS.length;
+  if (studyStep === STUDY_STEPS.length) {
+    $('calendarHotspot').setAttribute('aria-label', 'D-2. Tear off the calendar page to reveal D-1');
+  }
+  if (focusNext) {
+    const nextId = STUDY_STEPS[studyStep]?.id || 'calendarHotspot';
+    $(nextId).focus({ preventScroll: true });
+  }
+}
+
+function addStudySound(index) {
+  if (!started || day !== 2 || transitioning || index !== studyStep) return;
+  const step = STUDY_STEPS[index];
+  play(step.sound, step.volume, true, .35);
+  studyStep += 1;
+  updateStudyObjects(true);
+  $('soundCaption').textContent = [
+    '[Pages turn. The laptop is ready to use.]',
+    '[Pages and slow typing. Pick up the pencil.]',
+    '[Pages, slow typing and writing. The calendar is ready.]'
+  ][index];
+}
 
 function later(callback, delay) {
   const timer = setTimeout(() => {
@@ -198,56 +237,91 @@ async function startExperience() {
   $('beginScreen').classList.add('is-gone');
   $('beginScreen').inert = true;
   document.body.classList.add('is-studying');
-  $('calendarHotspot').disabled = $('tearButton').disabled = false;
+  updateStudyObjects(true);
   $('muteButton').disabled = $('replayButton').disabled = false;
   play('room', .24, true, 2);
   play('piano', .12, true, 3);
-  play('slowTyping', .22, true, 2);
   $('caption').textContent = 'Two days. One chapter at a time. I can do this.';
-  $('soundCaption').textContent = '[Quiet room, soft piano and slow, measured typing]';
-  $('tearButton').focus({ preventScroll: true });
+  $('soundCaption').textContent = '[Quiet room and soft piano. Open the book to begin studying.]';
 }
 
 function stressCue() {
-  if (!started || day !== 1) return;
+  if (!started || day !== 1 || transitioning) return;
   // This recording lasts about 17 seconds; leave space between notifications.
   if (!document.hidden) play('notification', .30);
   later(stressCue, 22000);
 }
 
 function tearCalendar() {
-  if (!started || tearing || day !== 2) return;
+  if (!started || tearing || transitioning || day !== 2 || studyStep !== STUDY_STEPS.length) return;
   tearing = true;
-  $('calendarHotspot').disabled = $('tearButton').disabled = true;
+  $('calendarHotspot').disabled = true;
   $('calendarHotspot').classList.add('is-tearing');
   play('paper', .75);
   $('soundCaption').textContent = '[A calendar page tears away]';
   day = 1;
   document.body.dataset.day = '1';
-  $('calendarHotspot').setAttribute('aria-label', 'D-1. One day left until the exam');
+  $('calendarHotspot').setAttribute('aria-label', 'D-1. Click the calendar to move to Exam Day');
+  updateStudyObjects();
   $('dayLabel').textContent = 'D-1 / RUNNING OUT OF TIME';
   $('caption').textContent = 'One day? But I’ve barely started.';
   $('soundCaption').textContent = '[Rapid writing, frantic typing, constant page flipping. The pressure swells.]';
   fadeLayer('piano', 0, .8, true);
   fadeLayer('slowTyping', 0, .5, true);
+  fadeLayer('book', 0, .5, true);
+  fadeLayer('writing', 0, .5, true);
   fadeLayer('room', .10, 2);
   play('fastWriting', .65, true, .4);
   play('fastTyping', .55, true, .6);
   play('flipping', .40, true, 1);
   play('pressure', .70, true, 4);
   later(() => {
-    if (day !== 1) return;
+    if (day !== 1 || transitioning) return;
     fadeLayer('fastWriting', 0, 2, true);
     play('fastestWriting', .75, true, 2);
     $('soundCaption').textContent = '[Writing becomes frantic. Typing, pages and notifications crowd the room.]';
   }, 6000);
   later(stressCue, 3000);
-  $('tearButton').hidden = true;
-  $('continueLink').hidden = false;
-  $('continueLink').focus({ preventScroll: true });
+  later(() => {
+    tearing = false;
+    $('calendarHotspot').disabled = false;
+    $('calendarHotspot').focus({ preventScroll: true });
+  }, 1100);
   later(() => { $('caption').textContent = 'I keep reading the same sentence. Nothing is staying in.'; }, 8000);
   later(() => { $('caption').textContent = 'The exam is tomorrow. There’s still so much left.'; }, 18000);
 
+}
+
+function goToExamDay() {
+  if (!started || day !== 1 || tearing || transitioning) return;
+  transitioning = true;
+  timers.forEach(clearTimeout);
+  timers.clear();
+  $('calendarHotspot').disabled = true;
+  $('replayButton').disabled = $('muteButton').disabled = true;
+  document.body.classList.add('scene-exiting');
+  $('caption').textContent = 'The exam is here.';
+  // Center and enlarge the complete calendar first, then fade picture and sound.
+  later(() => {
+    document.body.classList.add('scene-fading');
+    playing.forEach((entry) => {
+      if (entry.audio) fadeMedia(entry, 0, 1.4, true);
+      else {
+        entry.gain.gain.cancelAndHoldAtTime(context.currentTime);
+        entry.gain.gain.linearRampToValueAtTime(0, context.currentTime + 1.4);
+        entry.source.stop(context.currentTime + 1.45);
+      }
+    });
+    later(() => {
+      stopSound();
+      window.location.href = 'page3.html';
+    }, 1600);
+  }, 2000);
+}
+
+function onCalendarClick() {
+  if (day === 2) tearCalendar();
+  else goToExamDay();
 }
 
 function stopSound() {
@@ -265,21 +339,22 @@ function stopSound() {
 function replay() {
   stopSound();
   started = tearing = false;
+  transitioning = false;
+  studyStep = 0;
+  document.body.classList.remove('scene-exiting', 'scene-fading');
   day = 2;
   document.body.dataset.day = '2';
   $('calendarHotspot').classList.remove('is-tearing');
-  $('calendarHotspot').setAttribute('aria-label', 'D-2. Tear off the calendar page to reveal D-1');
+  $('calendarHotspot').setAttribute('aria-label', 'D-2. Explore the book, laptop and pencil to unlock the calendar');
   $('dayLabel').textContent = 'D-2 / THERE’S STILL TIME';
-  $('calendarHotspot').disabled = $('tearButton').disabled = true;
+  $('calendarHotspot').disabled = true;
   $('replayButton').disabled = true;
-  $('tearButton').hidden = false;
-  $('continueLink').hidden = true;
   startExperience();
 }
 
 $('beginButton').addEventListener('click', startExperience);
-$('calendarHotspot').addEventListener('click', tearCalendar);
-$('tearButton').addEventListener('click', tearCalendar);
+$('calendarHotspot').addEventListener('click', onCalendarClick);
+STUDY_STEPS.forEach((step, index) => $(step.id).addEventListener('click', () => addStudySound(index)));
 $('muteButton').addEventListener('click', () => setMuted(!muted));
 $('replayButton').addEventListener('click', replay);
 document.addEventListener('visibilitychange', () => {

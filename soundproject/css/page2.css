@@ -1,13 +1,13 @@
 /* Scene 2 only: keep the other collaborators' scenes independent. */
-.study-page { min-height: 100dvh; overflow: auto; background: #12101f; }
+.study-page { min-height: 100dvh; overflow: hidden; background: #12101f; }
 .study-page [hidden] { display: none !important; }
 .listening-note { color: #a39cc6; font-size: .85rem; margin-top: 1.4rem; }
-.study-page .pager { position: absolute; max-width: calc(100% - 1.5rem); }
-.study-controls { position: absolute; right: 1rem; top: 1rem; z-index: 50; display: flex; gap: .4rem; }
-.study-controls button { border: 1px solid #71658c; background: #191527e8; border-radius: 99px; padding: .4rem .8rem; font-size: .85rem; }
+.study-page .pager { position: fixed; max-width: calc(100% - 1.5rem); }
+.study-controls { position: fixed; right: 1rem; top: 1rem; z-index: 50; display: flex; gap: .4rem; }
+.study-controls button, .study-controls a { border: 1px solid #71658c; background: #191527e8; border-radius: 99px; padding: .4rem .8rem; font-size: .85rem; text-decoration: none; }
 .study-page button:disabled { cursor: default; opacity: .5; }
 .study-page button:focus-visible, .study-page a:focus-visible { outline: 3px solid #ffcf85; outline-offset: 5px; }
-.study-stage { position: relative; left: auto; top: auto; transform: none; margin: 5rem auto 0; width: min(100%, 1200px); container-type: inline-size; }
+.study-stage { container-type: inline-size; }
 .study-stage .room-image, .study-boy { transition: filter 2s ease; }
 .study-boy { position: absolute; inset: 0; pointer-events: none; transform-origin: 48% 81%; }
 .boy-sprite { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; user-select: none; pointer-events: none; }
@@ -32,6 +32,20 @@
 .study-screen p { font-size: .8cqw; color: #b6afc6; }
 .pressure-shade { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 51% 65%, transparent 8%, #100917dc 100%); opacity: 0; transition: opacity 2s ease; }
 /* Calendar artwork and dates sit above the room's pressure shade and filters. */
+.calendar-assembly { position: absolute; inset: 0; z-index: 6; pointer-events: none; transform-origin: 91.3% 27.9%; transition: transform 1.6s cubic-bezier(.22,.8,.25,1); }
+.calendar-assembly .study-calendar { pointer-events: auto; }
+.study-object { position: absolute; z-index: 5; border: 0; border-radius: .6cqw; padding: 0; background: transparent; }
+.study-object-book { left: 16.5%; top: 65.5%; width: 15.5%; height: 13.5%; }
+.study-object-laptop { left: 55.5%; top: 50.5%; width: 14%; height: 20.5%; }
+.study-object-pencil { left: 59.5%; top: 73%; width: 7.2%; height: 5.5%; min-height: 28px; }
+.study-object:disabled { pointer-events: none; }
+.study-object[data-active="true"]::after { content: ''; position: absolute; inset: -4px; border: 2px solid #ffcf85; border-radius: inherit; box-shadow: 0 0 12px #ffcf8555; animation: object-hint 2s ease-in-out infinite; pointer-events: none; }
+@keyframes object-hint { 0%, 100% { opacity: .4; } 50% { opacity: 1; } }
+.scene-exiting .calendar-assembly { transform: translate(-41.3%, 22.1%) scale(1.85); }
+.scene-exiting .pager, .scene-exiting .study-controls { opacity: 0; pointer-events: none; }
+.scene-exiting .study-calendar::after { display: none; }
+.scene-blackout { position: fixed; inset: 0; z-index: 200; background: #000; opacity: 0; pointer-events: none; transition: opacity 1.4s ease; }
+.scene-fading .scene-blackout { opacity: 1; pointer-events: auto; }
 .calendar-art { position: absolute; left: 85%; top: 10.6%; width: 12.6%; height: 34.6%; z-index: 3; pointer-events: none; user-select: none; }
 .study-calendar { position: absolute; left: 85.4%; top: 18.5%; width: 11.5%; height: 23.7%; z-index: 4; padding: 0; border: 0; background: #ece8f7; color: #1a1636; border-radius: 0 0 .5cqw .5cqw; }
 .calendar-face { position: absolute; inset: 0; display: flex; align-items: center; flex-direction: column; background: #ece8f7; border-radius: inherit; padding-top: 1.1cqw; }
@@ -55,19 +69,15 @@
 .study-page[data-day="1"] .thought-one { opacity: .85; }
 .study-page[data-day="1"] .thought-two { opacity: .8; transition-delay: 4s; }
 .study-page[data-day="1"] .thought-three { opacity: .7; transition-delay: 8s; }
-.study-footer { position: relative; text-align: center; padding: 1.5rem 1rem 2rem; max-width: 45rem; margin: 0 auto; }
-.day-label { color: #ffbd77; letter-spacing: .18em; font-size: .7rem; margin: 0 0 .6rem; }
-.study-caption { font: italic clamp(1.3rem, 3vw, 1.8rem)/1.4 Georgia, serif; margin: 0; min-height: 2.6em; }
-.sound-caption { font-size: .85rem; color: #b5abc9; min-height: 1.5em; margin: .3rem 0 1rem; }
-.study-action { display: inline-block; border: 1px solid #ffb454; border-radius: 99px; color: #ffca89; background: #241b31; padding: .65rem 1.3rem; text-decoration: none; }
-.audio-status { font-size: .8rem; color: #ffbdb4; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.audio-status { position: fixed; z-index: 50; right: 1rem; top: 3.5rem; max-width: min(28rem, 90vw); padding: .6rem .8rem; border-radius: .5rem; background: #191527ee; font-size: .8rem; color: #ffbdb4; }
+.audio-status:empty { display: none; }
 @media (max-width: 680px) {
   .study-page .pager { top: .7rem; left: .6rem; gap: .2rem; }
   .study-page .pager a { font-size: .75rem; padding: .35rem .55rem; }
   .study-controls { top: 3.5rem; right: .75rem; }
-  .study-stage { margin-top: 6.5rem; }
   .study-calendar::before { content: ''; position: absolute; inset: -8px; }
-  .study-footer { padding-top: 1.5rem; }
+  .audio-status { top: 6rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .study-page *, .study-page *::after { animation: none !important; transition: none !important; }

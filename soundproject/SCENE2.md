@@ -7,14 +7,18 @@ Begin unlocks those elements before asynchronous loading. There are no build dep
 
 ## Interaction and sound
 
-Begin starts D-2: room ambience, quiet piano, and the slow typing recording only.
+Begin starts D-2 with room ambience and quiet piano. The book is the first active
+hotspot: clicking it loops the normal page-flipping recording. The laptop unlocks
+next and adds slow typing. The pencil then unlocks and adds normal writing. All
+three study sounds keep playing together. Clicks cannot skip or repeat a step.
 Fast writing, typing, page flipping, pressure and notifications are blocked at D-2.
-The visitor controls how long they stay at D-2. Clicking the wall calendar or
-“Tear off a day” starts the paper recording and reveals D-1 in the same action.
+The calendar unlocks only after all three objects have been activated. The visitor
+controls how long they stay at D-2. Clicking the wall calendar starts the paper
+recording and reveals D-1 in the same action.
 The old sheet falls behind the new date over 1.1 seconds. The room darkens and
 anxious thoughts appear immediately as the sound starts.
 
-At D-1, slow typing fades out over 0.5 seconds and piano over 0.8 seconds.
+At D-1, normal pages, writing and slow typing fade out over 0.5 seconds and piano over 0.8 seconds.
 Fast writing, fast typing and continuous page flipping enter within one second;
 the louder pressure recording builds over 4 seconds. After 6 seconds, writing
 crossfades to the team's fastest take. Notifications begin at 3 seconds and repeat
@@ -23,17 +27,22 @@ The background darkens to 40% brightness over 2 seconds with a deep edge shadow.
 The calendar is a separate `media/study-calendar.svg` layer above the shade;
 its frame, red header and interactive dates retain their original brightness.
 The room uses `media/study-room-no-calendar.png`, with no painted-in calendar.
-The mix then holds until the visitor continues, replays, or leaves.
+After the 1.1-second tear, the D-1 calendar becomes clickable again. Clicking it
+moves the whole calendar (frame, header and date) to the center and enlarges it
+over 1.6 seconds. After a 0.4-second hold, a full-screen black overlay and the
+audio fade out over 1.4 seconds. The page opens `page3.html` after a further
+0.2 seconds of black. Other controls are disabled during this transition.
+No separate Continue button or visible bottom text is shown.
 
 Mute affects every layer. Start over returns to D-2, cancels pending cues, and
 preserves the mute setting. Audio pauses while the browser tab is hidden and
-stops on navigation. Keyboard users can activate either calendar control with
+stops on navigation. Keyboard users can activate each study object and the calendar with
 Enter or Space. Reduced-motion settings disable the tear and visual transitions.
 Captions describe the sound changes.
 
 ## Recording sources
 
-The eight added WAV files came from the team's
+The nine added WAV files came from the team's
 [shared recordings folder](https://drive.google.com/drive/folders/1QxgV6u4w8Wm3jI_PDhdys59EvuTnmxLa).
 They retain their original audio data; filenames use underscores locally.
 Room ambience and piano were already present in the repository. The calendar tear
@@ -46,8 +55,9 @@ No generated audio is used.
 
 | Local file | Drive file ID | Mix gain |
 | --- | --- | --- |
-| Writing.WAV | 1Am97AGtH-bJTGR4Y-rzSggMKHS0KosUN | Retained, unused |
-| Slow_typing.WAV | 18WQ8CrGjm7Y-VRmzL9B8EomMphC2oYUV | 0.22 at D-2 |
+| Real_page_flipping.WAV | 1Avj2U4lWYzT4YOFC8c4L-Uyq8Hm4GzUo | 0.25 after clicking the book |
+| Writing.WAV | 1Am97AGtH-bJTGR4Y-rzSggMKHS0KosUN | 0.25 after clicking the pencil |
+| Slow_typing.WAV | 18WQ8CrGjm7Y-VRmzL9B8EomMphC2oYUV | 0.28 after clicking the laptop |
 | Fast_writing.WAV | 1b94A8B8j2-YMj9-MTvAA7aBWtsqHKv2l | 0.65 at D-1 |
 | Fastest_writing.WAV | 1CWyttAQxyk7ARlgl_dnJYrcKsPNhTaks | 0.75 after 6 seconds at D-1 |
 | Fast_typing.WAV | 1Mz7jjZVL1z1V4BXXofxbln1STMLraqvM | 0.55 at D-1 |
@@ -62,6 +72,11 @@ piano starts at 0.12; the calendar tear uses 0.75. Edit `RECORDINGS` and the cue
 levels in `js/page2.js` to tune the sound design.
 
 ## Integration and validation
+
+Run `node --test tests/scene2.test.cjs` from the repository root. These regression
+tests cover ordered interaction, additive layers, the calendar lock/unlock,
+duplicate clicks, D-1 escalation, zoom-before-blackout timing, navigation and
+replay cancellation, using native audio, decoded Web Audio and failed-fetch fallback.
 
 Scene 1 now tears down to two days before handing off to Scene 2. Scene 2 link
 labels in Scenes 1 and 3 also read “Two days.” Scene 3's content is otherwise unchanged.

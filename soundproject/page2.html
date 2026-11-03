@@ -13,7 +13,7 @@
     <div>
       <p class="begin-project">Plenty of Time · Scene 2</p>
       <h1 class="begin-title">Two days left.</h1>
-      <p class="begin-sub">Time to study. There’s still time.<br>Listen to the room, then tear a page from the calendar.</p>
+      <p class="begin-sub">Time to study. There’s still time.<br>Explore the book, laptop and pencil. Then turn the calendar.</p>
       <button id="beginButton" type="button">Begin studying</button>
       <p class="listening-note">Best experienced with headphones.</p>
     </div>
@@ -37,20 +37,24 @@
     <div class="thought thought-one" aria-hidden="true">How much do I remember?</div>
     <div class="thought thought-two" aria-hidden="true">There’s too much left.</div>
     <div class="thought thought-three" aria-hidden="true">I just read this.</div>
-    <img class="calendar-art" src="media/study-calendar.svg" alt="" aria-hidden="true" draggable="false">
-    <button id="calendarHotspot" class="study-calendar" type="button" aria-label="D-2. Tear off the calendar page to reveal D-1" disabled>
-      <span class="calendar-face calendar-under" aria-hidden="true"><strong>D-1</strong><span>day left</span></span>
-      <span class="calendar-face calendar-paper" aria-hidden="true"><strong>D-2</strong><span>days left</span><i></i></span>
-    </button>
+    <button id="bookHotspot" class="study-object study-object-book" type="button" aria-label="Open the book and listen to the pages" disabled></button>
+    <button id="laptopHotspot" class="study-object study-object-laptop" type="button" aria-label="Add the sound of slow laptop typing" disabled></button>
+    <button id="pencilHotspot" class="study-object study-object-pencil" type="button" aria-label="Add the sound of pencil writing" disabled></button>
+    <div id="calendarAssembly" class="calendar-assembly">
+      <img class="calendar-art" src="media/study-calendar.svg" alt="" aria-hidden="true" draggable="false">
+      <button id="calendarHotspot" class="study-calendar" type="button" aria-label="D-2. Explore the book, laptop and pencil to unlock the calendar" disabled>
+        <span class="calendar-face calendar-under" aria-hidden="true"><strong>D-1</strong><span>day left</span></span>
+        <span class="calendar-face calendar-paper" aria-hidden="true"><strong>D-2</strong><span>days left</span><i></i></span>
+      </button>
+    </div>
   </main>
-  <footer class="study-footer">
+  <div id="sceneBlackout" class="scene-blackout" aria-hidden="true"></div>
+  <div class="sr-only">
     <p id="dayLabel" class="day-label">D-2 / THERE’S STILL TIME</p>
     <p id="caption" class="study-caption" aria-live="polite">Two days until the exam.</p>
     <p id="soundCaption" class="sound-caption" aria-live="polite"></p>
-    <button id="tearButton" class="study-action" type="button" disabled>Tear off a day ↗</button>
-    <a id="continueLink" class="study-action" href="page3.html" hidden>Continue to Scene 3 →</a>
-    <p id="audioStatus" class="audio-status" role="status"></p>
-  </footer>
+  </div>
+  <p id="audioStatus" class="audio-status" role="status"></p>
   <script src="js/calendar-audio.js"></script>
   <script src="js/page2.js"></script>
 </body>
