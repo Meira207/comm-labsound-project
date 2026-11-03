@@ -255,12 +255,13 @@ body.computer-on .screen-video {
   border: 0;
   padding: 0;
   background: transparent;
-  z-index: 5;
+  z-index: 10;
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
   transition: opacity 2s ease-in-out;
 }
+
 
 /* Glow around the paper and pen */
 .page3 #examHotspot::after {
@@ -302,14 +303,13 @@ body.computer-on .screen-video {
   top: 81%;
   width: 13%;
   height: auto;
-  z-index: 6;
+  z-index: 20;
   opacity: 0;
   pointer-events: none;
   user-select: none;
   transition: opacity 0.4s ease;
 }
 
-/* Show the paper when the submission scene begins */
 .page3 #examPaper.is-visible {
   opacity: 1;
   pointer-events: auto;
@@ -334,6 +334,17 @@ body.computer-on .screen-video {
 /* Show the teacher during submission */
 .page3 #teacher.is-visible {
   opacity: 1;
+}
+
+/* Drag and ending transitions */
+
+.page3 #stage {
+  opacity: 1;
+  transition: opacity 0.8s ease;
+}
+
+.page3 #examPaper {
+  touch-action: none;
 }
 
 /* -- Page links (top left) */
@@ -366,8 +377,6 @@ body.computer-on .screen-video {
 .pager a:hover:not([aria-current]) {
   color: #ece8f7;
 }
-
-
 
 .stub-stage {
   display: grid;
