@@ -193,8 +193,8 @@ function showEndingScreen() {
   stage.style.opacity = 0;
 
   setTimeout(function () {
-    beginTitle.textContent = "Time's Up. You're Free!";
-    beginSubtitle.textContent = 'The waiting, studying, and worrying are finally behind you.';
+    beginTitle.textContent = "Time's Up!";
+    beginSubtitle.textContent = 'The stress is finally over, until the next exam...';
     beginButton.textContent = 'Experience Again';
 
     beginScreen.classList.remove('is-gone');
