@@ -74,7 +74,9 @@ function startExam() {
     examHotspot.classList.add('is-active');
   }, { once: true });
 
+  setTimeout(function () {
   playEffect(deepBreathSound, 1);
+}, 1000);
 }
 
 examHotspot.addEventListener('click', finishExam);
