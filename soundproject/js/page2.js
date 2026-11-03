@@ -4,8 +4,8 @@ const RECORDINGS = {
   piano: 'audio/Piano_playing.m4a',
   paper: 'audio/calendar_sound.mp3',
   book: 'audio/Real_page_flipping.WAV',
-  writing: 'audio/Writing.WAV',
-  slowTyping: 'audio/Slow_typing.WAV',
+  writing: 'audio/Writing_200.WAV',
+  slowTyping: 'audio/Slow_typing_200.WAV',
   fastWriting: 'audio/Fast_writing.WAV',
   fastestWriting: 'audio/Fastest_writing.WAV',
   fastTyping: 'audio/Fast_typing.WAV',
@@ -35,10 +35,11 @@ let muted = false;
 let generation = 0;
 let studyStep = 0;
 let transitioning = false;
+const activatedStudySounds = new Set();
 const STUDY_STEPS = [
+  { id: 'pencilHotspot', sound: 'writing', volume: 1.0 },
   { id: 'bookHotspot', sound: 'book', volume: .25 },
-  { id: 'laptopHotspot', sound: 'slowTyping', volume: .28 },
-  { id: 'pencilHotspot', sound: 'writing', volume: .25 }
+  { id: 'laptopHotspot', sound: 'slowTyping', volume: .28 }
 ];
 // Long pauses at first, then increasingly crowded intrusive thoughts.
 const THOUGHT_CUES = [800, 2600, 4400, 6000, 7300, 8500, 9500, 10400, 11200,
@@ -75,12 +76,13 @@ function updateStudyObjects(focusNext = false) {
 function addStudySound(index) {
   if (!started || day !== 2 || transitioning || index !== studyStep) return;
   const step = STUDY_STEPS[index];
+  activatedStudySounds.add(step.sound);
   play(step.sound, step.volume, true, .35);
   studyStep += 1;
   updateStudyObjects(true);
   $('soundCaption').textContent = [
-    '[Pages turn. The laptop is ready to use.]',
-    '[Pages and slow typing. Pick up the pencil.]',
+    '[Writing begins. Open the book next.]',
+    '[Writing and pages. The laptop is ready to use.]',
     '[Pages, slow typing and writing. The calendar is ready.]'
   ][index];
 }
@@ -195,6 +197,7 @@ function playMedia(name, volume, loop, fadeSeconds) {
 
 function play(name, volume, loop = false, fadeSeconds = 0) {
   if (day !== 1 && INTENSE_RECORDINGS.has(name)) return;
+  if (day === 2 && STUDY_STEPS.some((step) => step.sound === name) && !activatedStudySounds.has(name)) return;
   if (!context || !master || !buffers.has(name)) {
     playMedia(name, volume, loop, fadeSeconds);
     return;
@@ -259,7 +262,7 @@ async function startExperience() {
   play('room', .24, true, 2);
   play('piano', .12, true, 3);
   $('caption').textContent = 'Two days. One chapter at a time. I can do this.';
-  $('soundCaption').textContent = '[Quiet room and soft piano. Open the book to begin studying.]';
+  $('soundCaption').textContent = '[Quiet room and soft piano. Pick up the pen to begin studying.]';
 }
 
 function stressCue() {
@@ -360,11 +363,12 @@ function replay() {
   started = tearing = false;
   transitioning = false;
   studyStep = 0;
+  activatedStudySounds.clear();
   document.body.classList.remove('scene-exiting', 'scene-fading');
   day = 2;
   document.body.dataset.day = '2';
   $('calendarHotspot').classList.remove('is-tearing');
-  $('calendarHotspot').setAttribute('aria-label', 'D-2. Explore the book, laptop and pencil to unlock the calendar');
+  $('calendarHotspot').setAttribute('aria-label', 'D-2. Use the pen, book and laptop to unlock the calendar');
   $('dayLabel').textContent = 'D-2 / THERE’S STILL TIME';
   $('calendarHotspot').disabled = true;
   $('replayButton').disabled = true;

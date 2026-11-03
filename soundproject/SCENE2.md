@@ -7,9 +7,9 @@ Begin unlocks those elements before asynchronous loading. There are no build dep
 
 ## Interaction and sound
 
-Begin starts D-2 with room ambience and quiet piano. The book is the first active
-hotspot: clicking it loops the normal page-flipping recording. The laptop unlocks
-next and adds slow typing. The pencil then unlocks and adds normal writing. All
+Begin starts D-2 with room ambience and quiet piano. The pen/pencil is the first
+active hotspot: clicking it starts normal writing. The book unlocks next and
+adds normal page flipping. The laptop then unlocks and adds slow typing. All
 three study sounds keep playing together. Clicks cannot skip or repeat a step.
 Fast writing, typing, page flipping, pressure and notifications are blocked at D-2.
 The calendar unlocks only after all three objects have been activated. The visitor
@@ -60,8 +60,8 @@ No generated audio is used.
 | Local file | Drive file ID | Mix gain |
 | --- | --- | --- |
 | Real_page_flipping.WAV | 1Avj2U4lWYzT4YOFC8c4L-Uyq8Hm4GzUo | 0.25 after clicking the book |
-| Writing.WAV | 1Am97AGtH-bJTGR4Y-rzSggMKHS0KosUN | 0.25 after clicking the pencil |
-| Slow_typing.WAV | 18WQ8CrGjm7Y-VRmzL9B8EomMphC2oYUV | 0.28 after clicking the laptop |
+| Writing_200.WAV | Derived from Writing.WAV, 1Am97AGtH-bJTGR4Y-rzSggMKHS0KosUN | Recording amplified 2×; gain 1.00 after clicking the pencil |
+| Slow_typing_200.WAV | Derived from Slow_typing.WAV, 18WQ8CrGjm7Y-VRmzL9B8EomMphC2oYUV | Recording amplified 2×; gain 0.28 after clicking the laptop |
 | Fast_writing.WAV | 1b94A8B8j2-YMj9-MTvAA7aBWtsqHKv2l | 0.65 at D-1 |
 | Fastest_writing.WAV | 1CWyttAQxyk7ARlgl_dnJYrcKsPNhTaks | 0.75 after 6 seconds at D-1 |
 | Fast_typing.WAV | 1Mz7jjZVL1z1V4BXXofxbln1STMLraqvM | 0.55 at D-1 |

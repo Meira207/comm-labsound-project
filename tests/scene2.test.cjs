@@ -112,19 +112,19 @@ for (const [name, protocol, failed] of [
     const s = scene(protocol, failed);
     await s.read('startExperience()');
     assert.deepEqual(s.layers(), ['room', 'piano']);
-    assert.equal(s.get('bookHotspot').disabled, false);
+    assert.equal(s.get('pencilHotspot').disabled, false);
     assert.equal(s.get('laptopHotspot').disabled, true);
     s.read('onCalendarClick(); addStudySound(1)');
     assert.equal(s.body.dataset.day, '2');
     assert.deepEqual(s.layers(), ['room', 'piano']);
-    s.click('bookHotspot');
-    assert.deepEqual(s.layers(), ['room', 'piano', 'book']);
+    s.click('pencilHotspot');
+    assert.deepEqual(s.layers(), ['room', 'piano', 'writing']);
     s.read('addStudySound(0)');
     assert.equal(s.read('studyStep'), 1);
+    s.click('bookHotspot');
+    assert.deepEqual(s.layers(), ['room', 'piano', 'writing', 'book']);
     s.click('laptopHotspot');
-    assert.deepEqual(s.layers(), ['room', 'piano', 'book', 'slowTyping']);
-    s.click('pencilHotspot');
-    assert.deepEqual(s.layers(), ['room', 'piano', 'book', 'slowTyping', 'writing']);
+    assert.deepEqual(s.layers(), ['room', 'piano', 'writing', 'book', 'slowTyping']);
     assert.equal(s.get('calendarHotspot').disabled, false);
     s.click('calendarHotspot');
     assert.equal(s.body.dataset.day, '1');
@@ -155,7 +155,7 @@ for (const [name, protocol, failed] of [
 test('replay resets the interaction order and cancels a pending exam transition', async () => {
   const s = scene();
   await s.read('startExperience()');
-  for (const id of ['bookHotspot', 'laptopHotspot', 'pencilHotspot', 'calendarHotspot']) s.click(id);
+  for (const id of ['pencilHotspot', 'bookHotspot', 'laptopHotspot', 'calendarHotspot']) s.click(id);
   s.advance(1100);
   s.click('calendarHotspot');
   s.read('replay()');
@@ -165,7 +165,7 @@ test('replay resets the interaction order and cancels a pending exam transition'
   assert.equal(s.body.dataset.day, '2');
   assert.equal(s.body.classList.values.has('scene-exiting'), false);
   assert.equal(s.body.classList.values.has('scene-fading'), false);
-  assert.equal(s.get('bookHotspot').disabled, false);
+  assert.equal(s.get('pencilHotspot').disabled, false);
   assert.equal(s.get('calendarHotspot').disabled, true);
   assert.deepEqual(s.layers(), ['room', 'piano']);
   s.read('stopSound()');
@@ -181,6 +181,8 @@ test('native writing audio is never started before the pencil is clicked', async
   assert.equal(s.read('mediaTracks.get("writing").playCalls'), 0);
   s.click('laptopHotspot');
   assert.equal(s.read('mediaTracks.get("writing").playCalls'), 0);
+  s.read('play("writing", 1, true)');
+  assert.equal(s.read('mediaTracks.get("writing").playCalls'), 0, 'Unactivated writing is blocked at the audio layer');
   s.click('pencilHotspot');
   assert.equal(s.read('mediaTracks.get("writing").playCalls'), 1);
   s.read('replay()');
@@ -202,7 +204,7 @@ test('D-1 thoughts accumulate gradually and reset completely on replay', async (
   await s.read('startExperience()');
   s.advance(20000);
   assert.equal(visible(), 0);
-  for (const id of ['bookHotspot', 'laptopHotspot', 'pencilHotspot', 'calendarHotspot']) s.click(id);
+  for (const id of ['pencilHotspot', 'bookHotspot', 'laptopHotspot', 'calendarHotspot']) s.click(id);
   assert.equal(visible(), 0, 'No thoughts appear at the date change itself');
   s.advance(800);
   assert.equal(visible(), 1);
