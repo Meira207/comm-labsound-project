@@ -14,6 +14,7 @@ const roomSound = new Audio('audio/ExamHallAmbience.mp3');
 const deepBreathSound = new Audio('audio/DeepBreath.mp3');
 const finalAnswerSound = new Audio('audio/FinalAnswer.mp3');
 const submissionSound = new Audio('audio/PaperSubmission.mp3');
+const examDoneSound = new Audio('audio/ExamDone.mp3');
 
 roomSound.loop = true;
 
@@ -179,6 +180,8 @@ function showFinalScene() {
   changeBackground('media/classroom3.png');
 
   showCaption('', false);
+
+  playEffect(examDoneSound, 0.7);
 
   setTimeout(showEndingScreen, 4000);
 }
