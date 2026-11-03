@@ -8,8 +8,9 @@ URL may prevent playback. There are no build dependencies.
 
 Begin starts D-2: room ambience, quiet piano, steady writing, and slow typing.
 The visitor controls how long they stay at D-2. Clicking the wall calendar or
-“Tear off a day” plays the paper recording and tears away D-2 over 1.1 seconds.
-The calendar then reads D-1. The room darkens and anxious thoughts appear.
+“Tear off a day” starts the paper recording and reveals D-1 in the same action.
+The old sheet falls behind the new date over 1.1 seconds. The room darkens and
+anxious thoughts appear immediately as the sound starts.
 
 At D-1, calm writing and typing fade out over 3 seconds, and piano over 5 seconds.
 Fast writing fades in over 4 seconds, fast typing over 9 seconds, and the pressure
@@ -28,7 +29,12 @@ Captions describe the sound changes.
 The seven added WAV files came from the team's
 [shared recordings folder](https://drive.google.com/drive/folders/1QxgV6u4w8Wm3jI_PDhdys59EvuTnmxLa).
 They retain their original audio data; filenames use underscores locally.
-Room ambience, piano, and the calendar tear were already present in the repository.
+Room ambience and piano were already present in the repository. The calendar tear
+uses the user-provided edited `audio/calendar_sound.mp3`, played at its original speed
+in both Scenes 1 and 2. Both scenes preload/decode the tear and remove quiet
+lead-in in memory using `js/calendar-audio.js`, retaining 5 milliseconds before
+the detected onset. The source MP3 is unchanged. The date and decoded sound
+start together, without loading a fresh media element on each tear.
 No generated audio is used.
 
 | Local file | Drive file ID | Mix gain |

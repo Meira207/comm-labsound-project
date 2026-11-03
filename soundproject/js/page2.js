@@ -2,7 +2,7 @@
 const RECORDINGS = {
   room: 'audio/Real_room_ambience.WAV',
   piano: 'audio/Piano_playing.m4a',
-  paper: 'audio/Removing_papet_from_calendar.WAV',
+  paper: 'audio/calendar_sound.mp3',
   writing: 'audio/Writing.WAV',
   slowTyping: 'audio/Slow_typing.WAV',
   fastWriting: 'audio/Fast_writing.WAV',
@@ -39,7 +39,7 @@ function audioProblem(message = 'Some audio could not load. Check your connectio
 
 async function prepareSound() {
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-  context = context || new AudioContextClass();
+  context = context || new AudioContextClass({ latencyHint: 'interactive' });
   if (!master) {
     // Leave headroom when multiple recorded layers overlap.
     master = context.createGain();
@@ -52,7 +52,7 @@ async function prepareSound() {
     const response = await fetch(path);
     if (!response.ok) throw new Error(name);
     const buffer = await context.decodeAudioData(await response.arrayBuffer());
-    buffers.set(name, buffer);
+    buffers.set(name, name === 'paper' ? trimCalendarLeadIn(buffer, context) : buffer);
   }));
   const results = await loading;
   if (results.some((result) => result.status === 'rejected')) {
@@ -139,28 +139,27 @@ function tearCalendar() {
   $('calendarHotspot').classList.add('is-tearing');
   play('paper', .75);
   $('soundCaption').textContent = '[A calendar page tears away]';
-  later(() => {
-    day = 1;
-    document.body.dataset.day = '1';
-    $('calendarHotspot').setAttribute('aria-label', 'D-1. One day left until the exam');
-    $('dayLabel').textContent = 'D-1 / RUNNING OUT OF TIME';
-    $('screenThought').textContent = 'Read. Reread. Why can’t I remember?';
-    $('caption').textContent = 'One day? But I’ve barely started.';
-    $('soundCaption').textContent = '[Writing and typing quicken. Pages rustle. Pressure builds.]';
-    fadeLayer('piano', 0, 5, true);
-    fadeLayer('writing', 0, 3, true);
-    fadeLayer('slowTyping', 0, 3, true);
-    fadeLayer('room', .18, 8);
-    play('fastWriting', .38, true, 4);
-    play('fastTyping', .24, true, 9);
-    play('pressure', .32, true, 18);
-    later(stressCue, 6500);
-    $('tearButton').hidden = true;
-    $('continueLink').hidden = false;
-    $('continueLink').focus({ preventScroll: true });
-    later(() => { $('caption').textContent = 'I keep reading the same sentence. Nothing is staying in.'; }, 8000);
-    later(() => { $('caption').textContent = 'The exam is tomorrow. There’s still so much left.'; }, 18000);
-  }, 1100);
+  day = 1;
+  document.body.dataset.day = '1';
+  $('calendarHotspot').setAttribute('aria-label', 'D-1. One day left until the exam');
+  $('dayLabel').textContent = 'D-1 / RUNNING OUT OF TIME';
+  $('screenThought').textContent = 'Read. Reread. Why can’t I remember?';
+  $('caption').textContent = 'One day? But I’ve barely started.';
+  $('soundCaption').textContent = '[Writing and typing quicken. Pages rustle. Pressure builds.]';
+  fadeLayer('piano', 0, 5, true);
+  fadeLayer('writing', 0, 3, true);
+  fadeLayer('slowTyping', 0, 3, true);
+  fadeLayer('room', .18, 8);
+  play('fastWriting', .38, true, 4);
+  play('fastTyping', .24, true, 9);
+  play('pressure', .32, true, 18);
+  later(stressCue, 6500);
+  $('tearButton').hidden = true;
+  $('continueLink').hidden = false;
+  $('continueLink').focus({ preventScroll: true });
+  later(() => { $('caption').textContent = 'I keep reading the same sentence. Nothing is staying in.'; }, 8000);
+  later(() => { $('caption').textContent = 'The exam is tomorrow. There’s still so much left.'; }, 18000);
+
 }
 
 function stopSound() {

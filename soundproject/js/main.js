@@ -1,15 +1,15 @@
 
 const ROOM_VOLUME = 0.6;
-const PIANO_VOLUME = 0.25;
+const PIANO_VOLUME = 1.0;
 const GAME_MUSIC_VOLUME = 0.5;
 const PAPER_VOLUME = 1.0;       
-const PAPER_RATE = 0.68;       
+const PAPER_RATE = 1.0;
 
-const PIANO_STARTS_AT = 2500;
 const STORY_LINE_AT = 7800;
 const SHOW_COMPUTER_PROMPT_AT = 11500;
 const AUTO_TURN_ON_AT = 62000;
-const AUTO_TEAR_AT = 120000;    // if no click on calendar: tear 2 min after Begin
+const CALENDAR_UNLOCK_AFTER = 10000; // Time spent with the computer on.
+const AUTO_TEAR_AT = 120000;    // Tear automatically 2 min after calendar unlock.
 
 const GAME_MUSIC_AT = 800;      
 
@@ -25,9 +25,33 @@ const calendarNumber = document.getElementById('calendarNumber');
 
 
 const roomSound = new Audio('audio/Real_room_ambience.WAV');
-const pianoSound = new Audio('audio/Piano_playing.m4a');
+// The recording is amplified offline, avoiding a Web Audio routing dependency.
+const pianoSound = new Audio('audio/piano_200.mp3');
 const gameMusic = new Audio('audio/game_theme.mp3');
-const paperTearSound = new Audio('audio/Removing_papet_from_calendar.WAV');
+const paperTearSound = new Audio('audio/calendar_sound.mp3');
+paperTearSound.preload = 'auto';
+let calendarAudioContext;
+let calendarAudioReady;
+let calendarAudioBuffer;
+
+function prepareCalendarAudio() {
+  if (calendarAudioReady) return;
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    calendarAudioContext = new AudioContextClass({ latencyHint: 'interactive' });
+    calendarAudioContext.resume().catch(function () {});
+    calendarAudioReady = fetch('audio/calendar_sound.mp3')
+      .then(function (response) {
+        if (!response.ok) throw new Error('Calendar audio unavailable');
+        return response.arrayBuffer();
+      })
+      .then(function (bytes) { return calendarAudioContext.decodeAudioData(bytes); })
+      .then(function (buffer) { calendarAudioBuffer = trimCalendarLeadIn(buffer, calendarAudioContext); })
+      .catch(function () { /* Use the preloaded media element as a fallback. */ });
+  } catch {
+    calendarAudioReady = Promise.resolve();
+  }
+}
 
 // Loops until we stop them
 roomSound.loop = true;
@@ -37,6 +61,28 @@ gameMusic.loop = true;
 
 let computerIsOn = false;
 let calendarIsTearing = false;
+let calendarIsAvailable = false;
+
+pianoSound.preload = 'auto';
+pianoSound.volume = PIANO_VOLUME;
+function startPiano() {
+  if (computerIsOn || calendarIsTearing) return;
+  if (!pianoSound.paused) return;
+  // Do not rewind a piano track that already started on page load.
+  pianoSound.play().then(function () {
+    document.getElementById('pianoRetryButton').hidden = true;
+  }).catch(function () {
+    // Keep a direct retry available if the browser rejects automatic playback.
+    if (!computerIsOn && !calendarIsTearing) {
+      document.getElementById('pianoRetryButton').hidden = false;
+    }
+  });
+}
+
+document.getElementById('pianoRetryButton').addEventListener('click', startPiano);
+
+// Attempt audible playback as soon as Scene 1 opens, before Begin is clicked.
+startPiano();
 
 // Show a short line of text at the bottom of the screen
 function showCaption(text, isStoryLine) {
@@ -89,34 +135,37 @@ function playLoop(audio, targetVolume, fadeSeconds) {
   fadeVolume(audio, targetVolume, fadeSeconds);
 }
 
-function playEffect(audio, volume, rate) {
+function playEffect(audio, volume, rate, onStart) {
   const copy = audio.cloneNode();
   copy.volume = volume;
   if (rate) {
     copy.playbackRate = rate;
   }
-  copy.play().catch(function () {});
+  // Resolve the visual cue when playback starts, rather than before loading.
+  copy.play().then(function () {
+    if (onStart) onStart();
+  }).catch(function () {
+    // The story can still advance if browser sound playback is blocked.
+    if (onStart) onStart();
+  });
 }
 
 beginButton.addEventListener('click', startExperience);
 
 function startExperience() {
+  startPiano();
+  prepareCalendarAudio();
   
   beginScreen.classList.add('is-gone');
 
-  calendarHotspot.hidden = false;
+  calendarHotspot.hidden = true;
+  calendarHotspot.disabled = true;
+  // Allow the visitor to click immediately; the reminder still appears later.
+  computerHotspot.hidden = false;
 
  
   playLoop(roomSound, ROOM_VOLUME, 5);
-  showCaption('[Room ambience: a quiet room]');
-
-  setTimeout(function () {
-    playLoop(pianoSound, PIANO_VOLUME, 8);
-  }, PIANO_STARTS_AT);
-
-  setTimeout(function () {
-    showCaption('[Soft piano, slow and low]');
-  }, PIANO_STARTS_AT + 2100);
+  showCaption('[Quiet room ambience and soft piano]');
 
   setTimeout(function () {
     if (!computerIsOn && !calendarIsTearing) {
@@ -136,16 +185,12 @@ function startExperience() {
     setTimeout(turnComputerOn, 2800);
   }, AUTO_TURN_ON_AT);
 
-  setTimeout(function () {
-    if (calendarIsTearing) return;
-    showCaption('Time slips.', true);
-    setTimeout(tearCalendar, 2500);
-  }, AUTO_TEAR_AT);
 }
 
 function turnComputerOn() {
   if (computerIsOn || calendarIsTearing) return;
   computerIsOn = true;
+  document.getElementById('pianoRetryButton').hidden = true;
 
   if (promptButton.textContent === 'Turn the computer on') {
     hidePrompt();
@@ -170,10 +215,19 @@ function turnComputerOn() {
   }, GAME_MUSIC_AT);
 
   setTimeout(function () {
-    if (!calendarIsTearing) {
-      showCaption('Just one round.', true);
-    }
-  }, 10000);
+    if (calendarIsTearing) return;
+    calendarIsAvailable = true;
+    calendarHotspot.hidden = false;
+    calendarHotspot.disabled = false;
+    showCaption('Just one round. Time slips.', true);
+    showPrompt('Tear a calendar page', tearCalendar);
+
+    setTimeout(function () {
+      if (calendarIsTearing) return;
+      showCaption('Time slips.', true);
+      setTimeout(tearCalendar, 2500);
+    }, AUTO_TEAR_AT);
+  }, CALENDAR_UNLOCK_AFTER);
 }
 
 //playing of the looping game footage on the monitor screen
@@ -183,13 +237,14 @@ function startGameVideo() {
 }
 
 function tearCalendar() {
-  if (calendarIsTearing) return;
+  if (!calendarIsAvailable || calendarIsTearing) return;
   calendarIsTearing = true;
+  document.getElementById('pianoRetryButton').hidden = true;
 
   hidePrompt();
   calendarHotspot.hidden = true;
   computerHotspot.hidden = true;
-  showCaption('[Paper tearing — our real recording, slow and clear]');
+  showCaption('[Paper tearing]');
 
   // Tear of calendar
   const tears = [
@@ -218,8 +273,28 @@ function tearCalendar() {
   }, 12500);
 }
 
-function tearOnePage(newNumber) {
-  playEffect(paperTearSound, PAPER_VOLUME, PAPER_RATE);
+async function tearOnePage(newNumber) {
+  // Decode once at Begin instead of loading a fresh element for each tear.
+  await calendarAudioReady;
+  if (calendarAudioBuffer) {
+    try {
+      await calendarAudioContext.resume();
+      const source = calendarAudioContext.createBufferSource();
+      const gain = calendarAudioContext.createGain();
+      source.buffer = calendarAudioBuffer;
+      gain.gain.value = PAPER_VOLUME;
+      source.connect(gain);
+      gain.connect(calendarAudioContext.destination);
+      source.onended = function () { source.disconnect(); gain.disconnect(); };
+      source.start();
+      calendarNumber.textContent = String(newNumber);
+      return;
+    } catch { /* Fall back if Web Audio is unavailable. */ }
+  }
+  paperTearSound.currentTime = 0;
+  paperTearSound.volume = PAPER_VOLUME;
+  paperTearSound.playbackRate = PAPER_RATE;
+  try { await paperTearSound.play(); } catch { /* Keep the date usable without sound. */ }
   calendarNumber.textContent = String(newNumber);
 }
 
@@ -242,5 +317,5 @@ function fadeEverythingOutAndGoToPage2() {
 
 computerHotspot.addEventListener('click', turnComputerOn);
 
-// Calendar clickable anytime after Begin 
+// Calendar becomes clickable after the computer has been on for a while.
 calendarHotspot.addEventListener('click', tearCalendar);
