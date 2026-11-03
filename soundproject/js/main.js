@@ -4,6 +4,7 @@ const PIANO_VOLUME = 1.0;
 const GAME_MUSIC_VOLUME = 0.5;
 const PAPER_VOLUME = 1.0;       
 const PAPER_RATE = 1.0;
+const CALENDAR_PAGE_INTERVAL = 3200;
 
 const STORY_LINE_AT = 7800;
 const SHOW_COMPUTER_PROMPT_AT = 11500;
@@ -28,7 +29,7 @@ const roomSound = new Audio('audio/Real_room_ambience.WAV');
 // The recording is amplified offline, avoiding a Web Audio routing dependency.
 const pianoSound = new Audio('audio/piano_200.mp3');
 const gameMusic = new Audio('audio/game_theme.mp3');
-const paperTearSound = new Audio('audio/calendar_sound.mp3');
+const paperTearSound = new Audio('audio/calendar_sound_instant.WAV');
 paperTearSound.preload = 'auto';
 let calendarAudioContext;
 let calendarAudioReady;
@@ -40,7 +41,7 @@ function prepareCalendarAudio() {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     calendarAudioContext = new AudioContextClass({ latencyHint: 'interactive' });
     calendarAudioContext.resume().catch(function () {});
-    calendarAudioReady = fetch('audio/calendar_sound.mp3')
+    calendarAudioReady = fetch('audio/calendar_sound_instant.WAV')
       .then(function (response) {
         if (!response.ok) throw new Error('Calendar audio unavailable');
         return response.arrayBuffer();
@@ -236,7 +237,7 @@ function startGameVideo() {
   gameVideo.play().catch(function () {});
 }
 
-function tearCalendar() {
+async function tearCalendar() {
   if (!calendarIsAvailable || calendarIsTearing) return;
   calendarIsTearing = true;
   document.getElementById('pianoRetryButton').hidden = true;
@@ -246,31 +247,19 @@ function tearCalendar() {
   computerHotspot.hidden = true;
   showCaption('[Paper tearing]');
 
-  // Tear of calendar
-  const tears = [
-    [0, 6],
-    [1800, 5],
-    [3800, 4],
-    [5800, 3],
-    [7800, 2]
-  ];
-
-  tears.forEach(function (item) {
-    const when = item[0];
-    const newNumber = item[1];
-    setTimeout(function () {
-      tearOnePage(newNumber);
-    }, when);
-  });
-
-  setTimeout(function () {
-    showCaption('Two days left. Time to study.', true);
-  }, 9500);
-
-  // Fade everything out, then open page 2
-  setTimeout(function () {
-    fadeEverythingOutAndGoToPage2();
-  }, 12500);
+  // Keep each number on screen longer and serialize actual audio playback.
+  for (const newNumber of [6, 5, 4, 3, 2]) {
+    const beganAt = performance.now();
+    await tearOnePage(newNumber);
+    if (newNumber !== 2) {
+      const remaining = Math.max(600, CALENDAR_PAGE_INTERVAL - (performance.now() - beganAt));
+      await new Promise(function (resolve) { setTimeout(resolve, remaining); });
+    }
+  }
+  await new Promise(function (resolve) { setTimeout(resolve, 1200); });
+  showCaption('Two days left. Time to study.', true);
+  await new Promise(function (resolve) { setTimeout(resolve, 3000); });
+  fadeEverythingOutAndGoToPage2();
 }
 
 async function tearOnePage(newNumber) {
@@ -282,11 +271,15 @@ async function tearOnePage(newNumber) {
       const source = calendarAudioContext.createBufferSource();
       const gain = calendarAudioContext.createGain();
       source.buffer = calendarAudioBuffer;
+      source.playbackRate.value = PAPER_RATE;
       gain.gain.value = PAPER_VOLUME;
       source.connect(gain);
       gain.connect(calendarAudioContext.destination);
-      source.onended = function () { source.disconnect(); gain.disconnect(); };
+      const finished = new Promise(function (resolve) {
+        source.onended = function () { source.disconnect(); gain.disconnect(); resolve(); };
+      });
       source.start();
+      await finished;
       calendarNumber.textContent = String(newNumber);
       return;
     } catch { /* Fall back if Web Audio is unavailable. */ }
@@ -294,7 +287,16 @@ async function tearOnePage(newNumber) {
   paperTearSound.currentTime = 0;
   paperTearSound.volume = PAPER_VOLUME;
   paperTearSound.playbackRate = PAPER_RATE;
-  try { await paperTearSound.play(); } catch { /* Keep the date usable without sound. */ }
+  await new Promise(function (resolve) {
+    const finish = function () {
+      paperTearSound.onended = null;
+      paperTearSound.onerror = null;
+      resolve();
+    };
+    paperTearSound.onended = finish;
+    paperTearSound.onerror = finish;
+    paperTearSound.play().catch(finish);
+  });
   calendarNumber.textContent = String(newNumber);
 }
 
