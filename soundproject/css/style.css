@@ -1,10 +1,11 @@
-
-
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Newsreader:ital,opsz,wght@1,6..72,400&display=swap');
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
 }
@@ -22,7 +23,9 @@ button {
   cursor: pointer;
 }
 
-a { color: #ffb454; }
+a {
+  color: #ffb454;
+}
 
 
 .begin-screen {
@@ -118,6 +121,7 @@ a { color: #ffb454; }
   pointer-events: none;
   transition: opacity 0.2s steps(1);
 }
+
 body.computer-on .screen-video {
   opacity: 1;
 }
@@ -151,8 +155,15 @@ body.computer-on .screen-video {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.2; }
-  50% { opacity: 0.9; }
+
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+
+  50% {
+    opacity: 0.9;
+  }
 }
 
 .hotspot-computer {
@@ -237,10 +248,10 @@ body.computer-on .screen-video {
 /* Interactive exam area */
 .page3 #examHotspot {
   position: absolute;
-  left: 42%;
-  top: 78%;
-  width: 20%;
-  height: 15%;
+  left: 43.5%;
+  top: 80%;
+  width: 13%;
+  height: 11%;
   border: 0;
   padding: 0;
   background: transparent;
@@ -248,6 +259,7 @@ body.computer-on .screen-video {
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
+  transition: opacity 2s ease-in-out;
 }
 
 /* Glow around the paper and pen */
@@ -255,14 +267,13 @@ body.computer-on .screen-video {
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: 20px;
-  background: radial-gradient(
-    ellipse,
-    rgba(255, 210, 110, 0.4),
-    rgba(255, 180, 84, 0.12) 55%,
-    transparent 75%
-  );
-  box-shadow: 0 0 22px rgba(255, 180, 84, 0.5);
+  border-radius: 12px;
+  background: transparent;
+  border: 2px solid rgba(255, 210, 110, 0.95);
+  box-shadow:
+    0 0 10px rgba(255, 180, 84, 0.8),
+    0 0 22px rgba(255, 180, 84, 0.5),
+    inset 0 0 8px rgba(255, 180, 84, 0.2);
   animation: examGlow 1.8s ease-in-out infinite;
   pointer-events: none;
 }
@@ -273,9 +284,12 @@ body.computer-on .screen-video {
 }
 
 @keyframes examGlow {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.4;
   }
+
   50% {
     opacity: 1;
   }
