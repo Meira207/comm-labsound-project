@@ -196,7 +196,8 @@ function tearCalendar() {
     [0, 6],
     [1800, 5],
     [3800, 4],
-    [5800, 3]
+    [5800, 3],
+    [7800, 2]
   ];
 
   tears.forEach(function (item) {
@@ -208,13 +209,13 @@ function tearCalendar() {
   });
 
   setTimeout(function () {
-    showCaption('Three days left. Still plenty of time.', true);
-  }, 7500);
+    showCaption('Two days left. Time to study.', true);
+  }, 9500);
 
   // Fade everything out, then open page 2
   setTimeout(function () {
     fadeEverythingOutAndGoToPage2();
-  }, 10500);
+  }, 12500);
 }
 
 function tearOnePage(newNumber) {
