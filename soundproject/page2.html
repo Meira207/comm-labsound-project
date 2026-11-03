@@ -3,38 +3,55 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Plenty of Time · Three days</title>
+  <title>Plenty of Time · Two days left</title>
+  <meta name="description" content="An interactive sound story about exam stress. Tear the calendar from D-2 to D-1 and hear the pressure rise.">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/page2.css">
 </head>
-
-<body class="stub-page">
-
-  
-
+<body class="study-page" data-day="2">
   <div id="beginScreen" class="begin-screen">
-    <p class="begin-project">Plenty of Time</p>
-    <h1 class="begin-title">Three days</h1>
-    <p class="begin-sub">Still plenty of time… right? Build your scene here.</p>
-    <button id="beginButton" type="button">Begin</button>
+    <div>
+      <p class="begin-project">Plenty of Time · Scene 2</p>
+      <h1 class="begin-title">Two days left.</h1>
+      <p class="begin-sub">Time to study. There’s still time.<br>Listen to the room, then tear a page from the calendar.</p>
+      <button id="beginButton" type="button">Begin studying</button>
+      <p class="listening-note">Best experienced with headphones.</p>
+    </div>
   </div>
-
-  <main class="stage stub-stage">
-    <section class="stub-box">
-      <h2>Page 2 starter</h2>
-      <p>Idea: the student finally tries to study. Phone buzzes. Clock gets louder. Tension rises.</p>
-      <p>Replace this box with a room image (or your own HTML), then wire sounds in <code>js/page2.js</code>.</p>
-      <p><a href="page3.html">Go to page 3 →</a></p>
-    </section>
-  </main>
-
-  <p id="caption" class="caption" aria-live="polite"></p>
-
   <nav class="pager" aria-label="Pages">
     <a href="index.html">1 · Seven days</a>
-    <a href="page2.html" aria-current="page">2 · Three days</a>
+    <a href="page2.html" aria-current="page">2 · Two days</a>
     <a href="page3.html">3 · Exam Day</a>
   </nav>
-
+  <div class="study-controls">
+    <button id="muteButton" type="button" aria-pressed="false" disabled>Mute sound</button>
+    <button id="replayButton" type="button" disabled>Start over</button>
+  </div>
+  <main id="stage" class="stage study-stage" aria-label="A student studying in their bedroom">
+    <img class="room-image" src="media/room.png" alt="The bedroom from Scene 1. The student is at the desk beneath a tear-off exam calendar." draggable="false">
+    <div class="study-screen" aria-hidden="true">
+      <span class="screen-label">FINAL EXAM / REVISION</span>
+      <h2>One chapter at a time.</h2>
+      <div class="study-lines"></div>
+      <p id="screenThought">Read. Understand. Remember.</p>
+    </div>
+    <div class="pressure-shade" aria-hidden="true"></div>
+    <div class="thought thought-one" aria-hidden="true">How much do I remember?</div>
+    <div class="thought thought-two" aria-hidden="true">There’s too much left.</div>
+    <div class="thought thought-three" aria-hidden="true">I just read this.</div>
+    <button id="calendarHotspot" class="study-calendar" type="button" aria-label="D-2. Tear off the calendar page to reveal D-1" disabled>
+      <span class="calendar-face calendar-under" aria-hidden="true"><strong>D-1</strong><span>day left</span></span>
+      <span class="calendar-face calendar-paper" aria-hidden="true"><strong>D-2</strong><span>days left</span><i></i></span>
+    </button>
+  </main>
+  <footer class="study-footer">
+    <p id="dayLabel" class="day-label">D-2 / THERE’S STILL TIME</p>
+    <p id="caption" class="study-caption" aria-live="polite">Two days until the exam.</p>
+    <p id="soundCaption" class="sound-caption" aria-live="polite"></p>
+    <button id="tearButton" class="study-action" type="button" disabled>Tear off a day ↗</button>
+    <a id="continueLink" class="study-action" href="page3.html" hidden>Continue to Scene 3 →</a>
+    <p id="audioStatus" class="audio-status" role="status"></p>
+  </footer>
   <script src="js/page2.js"></script>
 </body>
 </html>

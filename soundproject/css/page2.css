@@ -1,0 +1,55 @@
+/* Scene 2 only: keep the other collaborators' scenes independent. */
+.study-page { min-height: 100dvh; overflow: auto; background: #12101f; }
+.study-page [hidden] { display: none !important; }
+.listening-note { color: #a39cc6; font-size: .85rem; margin-top: 1.4rem; }
+.study-page .pager { position: absolute; max-width: calc(100% - 1.5rem); }
+.study-controls { position: absolute; right: 1rem; top: 1rem; z-index: 50; display: flex; gap: .4rem; }
+.study-controls button { border: 1px solid #71658c; background: #191527e8; border-radius: 99px; padding: .4rem .8rem; font-size: .85rem; }
+.study-page button:disabled { cursor: default; opacity: .5; }
+.study-page button:focus-visible, .study-page a:focus-visible { outline: 3px solid #ffcf85; outline-offset: 5px; }
+.study-stage { position: relative; left: auto; top: auto; transform: none; margin: 5rem auto 0; width: min(100%, 1200px); container-type: inline-size; }
+.study-stage .room-image { transition: filter 8s ease; }
+.study-screen { position: absolute; left: 43.7%; top: 30%; width: 32.5%; height: 32.5%; padding: 2.1cqw 2.4cqw; overflow: hidden; background: #22243c; color: #e4dccb; border-radius: 3px; box-shadow: inset 0 0 4cqw #101321; }
+.screen-label { font-size: .65cqw; letter-spacing: .18em; color: #c2ad83; }
+.study-screen h2 { font-size: 1.7cqw; font-weight: 400; margin: 1cqw 0 1.6cqw; font-family: Georgia, serif; }
+.study-lines { width: 90%; height: 5cqw; background: repeating-linear-gradient(transparent 0 1cqw, #8c8da54a 1cqw 1.14cqw); }
+.study-screen p { font-size: .8cqw; color: #b6afc6; }
+.pressure-shade { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 51% 58%, transparent 12%, #340a28b0 100%); opacity: 0; transition: opacity 9s ease; }
+.study-calendar { position: absolute; left: 85.4%; top: 18.5%; width: 11.5%; height: 23.7%; padding: 0; border: 0; background: #ece8f7; color: #1a1636; border-radius: 0 0 .5cqw .5cqw; }
+.calendar-face { position: absolute; inset: 0; display: flex; align-items: center; flex-direction: column; background: #ece8f7; border-radius: inherit; padding-top: 1.1cqw; }
+.calendar-face strong { font-size: 4.3cqw; line-height: 1.2; letter-spacing: -.06em; }
+.calendar-face > span { font-size: 1.35cqw; font-weight: 600; color: #70678e; margin-top: .9cqw; }
+.calendar-paper { transform-origin: top left; box-shadow: 0 .4cqw .2cqw #29214222; }
+.calendar-paper i { position: absolute; bottom: 1.3cqw; width: 36%; height: .3cqw; border-radius: 99px; background: #c9c0dd; }
+.study-calendar:not(:disabled):hover .calendar-paper { transform: rotate(-3deg); }
+.study-calendar:not(:disabled)::after { content: ''; position: absolute; inset: -5px; border: 2px dashed #ffd18c; border-radius: .5rem; }
+.is-tearing .calendar-paper { animation: rip-day 1.1s ease-in forwards; }
+@keyframes rip-day { 20% { transform: rotate(-8deg) translateY(3%); } 45% { transform: rotate(7deg) translateY(16%); } 100% { transform: translate(-35%, 220%) rotate(30deg); opacity: 0; } }
+.thought { position: absolute; z-index: 2; opacity: 0; color: #ffe1e6; font: italic 1.6cqw Georgia, serif; text-shadow: 0 2px 12px #120710; pointer-events: none; transition: opacity 8s ease; }
+.thought-one { left: 9%; top: 21%; transform: rotate(-5deg); }
+.thought-two { left: 61%; top: 73%; transform: rotate(3deg); }
+.thought-three { left: 12%; top: 69%; transform: rotate(-3deg); }
+.study-page[data-day="1"] .room-image { filter: brightness(.64) saturate(.7); }
+.study-page[data-day="1"] .pressure-shade { opacity: 1; }
+.study-page[data-day="1"] .study-screen { background: #302031; }
+.study-page[data-day="1"] .thought-one { opacity: .85; }
+.study-page[data-day="1"] .thought-two { opacity: .8; transition-delay: 4s; }
+.study-page[data-day="1"] .thought-three { opacity: .7; transition-delay: 8s; }
+.study-footer { position: relative; text-align: center; padding: 1.5rem 1rem 2rem; max-width: 45rem; margin: 0 auto; }
+.day-label { color: #ffbd77; letter-spacing: .18em; font-size: .7rem; margin: 0 0 .6rem; }
+.study-caption { font: italic clamp(1.3rem, 3vw, 1.8rem)/1.4 Georgia, serif; margin: 0; min-height: 2.6em; }
+.sound-caption { font-size: .85rem; color: #b5abc9; min-height: 1.5em; margin: .3rem 0 1rem; }
+.study-action { display: inline-block; border: 1px solid #ffb454; border-radius: 99px; color: #ffca89; background: #241b31; padding: .65rem 1.3rem; text-decoration: none; }
+.audio-status { font-size: .8rem; color: #ffbdb4; }
+@media (max-width: 680px) {
+  .study-page .pager { top: .7rem; left: .6rem; gap: .2rem; }
+  .study-page .pager a { font-size: .75rem; padding: .35rem .55rem; }
+  .study-controls { top: 3.5rem; right: .75rem; }
+  .study-stage { margin-top: 6.5rem; }
+  .study-calendar::before { content: ''; position: absolute; inset: -8px; }
+  .study-footer { padding-top: 1.5rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .study-page *, .study-page *::after { animation: none !important; transition: none !important; }
+  .is-tearing .calendar-paper { opacity: 0; }
+}
