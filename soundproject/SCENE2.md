@@ -20,6 +20,9 @@ the louder pressure recording builds over 4 seconds. After 6 seconds, writing
 crossfades to the team's fastest take. Notifications begin at 3 seconds and repeat
 every 22 seconds, leaving space for the approximately 17-second recording.
 The background darkens to 40% brightness over 2 seconds with a deep edge shadow.
+The calendar is a separate `media/study-calendar.svg` layer above the shade;
+its frame, red header and interactive dates retain their original brightness.
+The room uses `media/study-room-no-calendar.png`, with no painted-in calendar.
 The mix then holds until the visitor continues, replays, or leaves.
 
 Mute affects every layer. Start over returns to D-2, cancels pending cues, and

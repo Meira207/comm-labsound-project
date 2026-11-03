@@ -1,0 +1,3 @@
+Generated with the built-in image generation tool, editing `study-room-plate.png`.
+
+Edit target: this study-room background plate. Remove ONLY the wall calendar in the upper-right corner, including its red header, pale paper, frame, hanging wire, hook and shadow. Fill that area seamlessly with the same purple wall shading and subtle vertical panel line pattern. Preserve absolutely everything else: all room geometry, window, poster, laptop, books, notebook, papers, lamp, chair and desk, all colors and positions, exact same 1672x941 wide composition. Do not add a person. No other changes. This clean wall will receive a separate interactive calendar asset.
