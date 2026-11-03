@@ -249,7 +249,7 @@ body.computer-on .screen-video {
 .page3 #examHotspot {
   position: absolute;
   left: 43.5%;
-  top: 80%;
+  top: 78.5%;
   width: 13%;
   height: 11%;
   border: 0;
@@ -299,9 +299,9 @@ body.computer-on .screen-video {
 /* Separate exam paper */
 .page3 #examPaper {
   position: absolute;
-  left: 42%;
+  left: 44.8%;
   top: 81%;
-  width: 13%;
+  width: 9.5%;
   height: auto;
   z-index: 20;
   opacity: 0;
@@ -320,8 +320,8 @@ body.computer-on .screen-video {
 /* Teacher standing beside the desk */
 .page3 #teacher {
   position: absolute;
-  left: 63%;
-  top: 43%;
+  left: 59%;
+  top: 40%;
   width: 15%;
   height: auto;
   z-index: 4;
