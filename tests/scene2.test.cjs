@@ -46,8 +46,8 @@ function scene(protocol = 'file:', failFetch = false) {
     return nodes.get(id);
   };
   class Audio {
-    constructor(url) { this.url = url; this.volume = 1; this.paused = true; }
-    play() { this.paused = false; return Promise.resolve(); }
+    constructor(url) { this.url = url; this.volume = 1; this.paused = true; this.playCalls = 0; }
+    play() { this.playCalls++; this.paused = false; return Promise.resolve(); }
     pause() { this.paused = true; }
   }
   const param = () => ({
@@ -168,5 +168,52 @@ test('replay resets the interaction order and cancels a pending exam transition'
   assert.equal(s.get('bookHotspot').disabled, false);
   assert.equal(s.get('calendarHotspot').disabled, true);
   assert.deepEqual(s.layers(), ['room', 'piano']);
+  s.read('stopSound()');
+});
+
+test('native writing audio is never started before the pencil is clicked', async () => {
+  const s = scene();
+  await s.read('startExperience()');
+  for (const name of ['book', 'writing', 'slowTyping', 'fastWriting', 'fastestWriting', 'flipping']) {
+    assert.equal(s.read(`mediaTracks.get('${name}').playCalls`), 0, `${name} must not be primed`);
+  }
+  s.click('bookHotspot');
+  assert.equal(s.read('mediaTracks.get("writing").playCalls'), 0);
+  s.click('laptopHotspot');
+  assert.equal(s.read('mediaTracks.get("writing").playCalls'), 0);
+  s.click('pencilHotspot');
+  assert.equal(s.read('mediaTracks.get("writing").playCalls'), 1);
+  s.read('replay()');
+  for (let i = 0; i < 30; i++) await Promise.resolve();
+  assert.equal(s.read('mediaTracks.get("writing").playCalls'), 1, 'Replay must not restart writing');
+  assert.equal(s.read('mediaTracks.get("writing").paused'), true);
+  s.read('stopSound()');
+});
+
+test('D-2 thoughts are removed from rendering rather than slowly fading away', () => {
+  const css = fs.readFileSync(path.join(project, 'soundproject/css/page2.css'), 'utf8');
+  assert.match(css, /\.study-page\[data-day="2"\] \.thought\s*\{[^}]*display:\s*none;[^}]*transition:\s*none;/);
+});
+
+test('D-1 thoughts accumulate gradually and reset completely on replay', async () => {
+  const s = scene();
+  const visible = () => Array.from({ length: 18 }, (_, i) => s.get(`thought${i + 1}`))
+    .filter((node) => node.classList.values.has('is-visible')).length;
+  await s.read('startExperience()');
+  s.advance(20000);
+  assert.equal(visible(), 0);
+  for (const id of ['bookHotspot', 'laptopHotspot', 'pencilHotspot', 'calendarHotspot']) s.click(id);
+  assert.equal(visible(), 0, 'No thoughts appear at the date change itself');
+  s.advance(800);
+  assert.equal(visible(), 1);
+  s.advance(1800);
+  assert.equal(visible(), 2);
+  s.advance(13000);
+  assert.equal(visible(), 18);
+  s.read('replay()');
+  for (let i = 0; i < 30; i++) await Promise.resolve();
+  assert.equal(visible(), 0);
+  s.advance(20000);
+  assert.equal(visible(), 0, 'Old D-1 thoughts cannot leak into D-2');
   s.read('stopSound()');
 });

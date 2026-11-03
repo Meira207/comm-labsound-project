@@ -15,8 +15,12 @@ Fast writing, typing, page flipping, pressure and notifications are blocked at D
 The calendar unlocks only after all three objects have been activated. The visitor
 controls how long they stay at D-2. Clicking the wall calendar starts the paper
 recording and reveals D-1 in the same action.
-The old sheet falls behind the new date over 1.1 seconds. The room darkens and
-anxious thoughts appear immediately as the sound starts.
+The old sheet falls behind the new date over 1.1 seconds. The room starts
+darkening with the sound, followed by the anxious thoughts.
+Thought text starts 0.8 seconds after D-1, rather than all appearing together.
+Eighteen thoughts accumulate over 15.6 seconds, with increasingly short gaps;
+later phrases are larger and more emphatic. They clear completely on replay
+and remain hidden throughout D-2.
 
 At D-1, normal pages, writing and slow typing fade out over 0.5 seconds and piano over 0.8 seconds.
 Fast writing, fast typing and continuous page flipping enter within one second;

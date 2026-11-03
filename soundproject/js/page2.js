@@ -40,6 +40,20 @@ const STUDY_STEPS = [
   { id: 'laptopHotspot', sound: 'slowTyping', volume: .28 },
   { id: 'pencilHotspot', sound: 'writing', volume: .25 }
 ];
+// Long pauses at first, then increasingly crowded intrusive thoughts.
+const THOUGHT_CUES = [800, 2600, 4400, 6000, 7300, 8500, 9500, 10400, 11200,
+  11900, 12500, 13000, 13500, 14000, 14400, 14800, 15200, 15600];
+
+function clearThoughts() {
+  THOUGHT_CUES.forEach((_, index) => $(`thought${index + 1}`).classList.remove('is-visible'));
+}
+
+function startThoughts() {
+  clearThoughts();
+  THOUGHT_CUES.forEach((delay, index) => later(() => {
+    if (day === 1 && !transitioning) $(`thought${index + 1}`).classList.add('is-visible');
+  }, delay));
+}
 
 function updateStudyObjects(focusNext = false) {
   STUDY_STEPS.forEach((step, index) => {
@@ -117,10 +131,13 @@ async function prepareSound() {
 }
 
 function unlockMedia() {
-  // Run directly inside Begin's gesture, before asynchronous loading/decoding.
-  mediaTracks.forEach((audio, name) => {
+  // Only ambience may be primed at Begin. Never call play() on a study object
+  // before its click: some browsers ignore HTMLMediaElement.volume = 0.
+  ['room', 'piano'].forEach((name) => {
+    const audio = mediaTracks.get(name);
     if (mediaPlaying.has(name)) return;
     audio.volume = 0;
+    audio.muted = true;
     audio.play().then(() => {
       if (!mediaPlaying.has(name)) {
         audio.pause();
@@ -261,6 +278,7 @@ function tearCalendar() {
   $('soundCaption').textContent = '[A calendar page tears away]';
   day = 1;
   document.body.dataset.day = '1';
+  startThoughts();
   $('calendarHotspot').setAttribute('aria-label', 'D-1. Click the calendar to move to Exam Day');
   updateStudyObjects();
   $('dayLabel').textContent = 'D-1 / RUNNING OUT OF TIME';
@@ -325,6 +343,7 @@ function onCalendarClick() {
 }
 
 function stopSound() {
+  clearThoughts();
   document.body.classList.remove('is-studying');
   ++generation;
   timers.forEach(clearTimeout);

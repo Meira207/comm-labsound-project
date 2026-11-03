@@ -43,32 +43,30 @@
 @keyframes object-hint { 0%, 100% { opacity: .4; } 50% { opacity: 1; } }
 .scene-exiting .calendar-assembly { transform: translate(-41.3%, 22.1%) scale(1.85); }
 .scene-exiting .pager, .scene-exiting .study-controls { opacity: 0; pointer-events: none; }
-.scene-exiting .study-calendar::after { display: none; }
+.scene-exiting .calendar-assembly::after { display: none; }
 .scene-blackout { position: fixed; inset: 0; z-index: 200; background: #000; opacity: 0; pointer-events: none; transition: opacity 1.4s ease; }
 .scene-fading .scene-blackout { opacity: 1; pointer-events: auto; }
 .calendar-art { position: absolute; left: 85%; top: 10.6%; width: 12.6%; height: 34.6%; z-index: 3; pointer-events: none; user-select: none; }
 .study-calendar { position: absolute; left: 85.4%; top: 18.5%; width: 11.5%; height: 23.7%; z-index: 4; padding: 0; border: 0; background: #ece8f7; color: #1a1636; border-radius: 0 0 .5cqw .5cqw; }
-.calendar-face { position: absolute; inset: 0; display: flex; align-items: center; flex-direction: column; background: #ece8f7; border-radius: inherit; padding-top: 1.1cqw; }
-.calendar-face strong { font-size: 4.3cqw; line-height: 1.2; letter-spacing: -.06em; }
-.calendar-face > span { font-size: 1.35cqw; font-weight: 600; color: #70678e; margin-top: .9cqw; }
+.study-page .study-calendar:disabled { opacity: 1; }
+.calendar-face { position: absolute; inset: 0; display: flex; align-items: center; flex-direction: column; background: #ece8f7; border-radius: inherit; padding-top: 1.2cqw; }
+.calendar-face strong { font-family: 'Bricolage Grotesque', 'Segoe UI', sans-serif; font-weight: 800; font-size: 6.8cqw; line-height: 1; letter-spacing: -.03em; color: #1a1636; }
+.calendar-face > span { font-size: 1.6cqw; line-height: 1.2; font-weight: 800; color: #70678e; margin-top: 1.4cqw; }
 .calendar-paper { transform-origin: top left; box-shadow: 0 .4cqw .2cqw #29214222; }
-.calendar-paper i { position: absolute; bottom: 1.3cqw; width: 36%; height: .3cqw; border-radius: 99px; background: #c9c0dd; }
+.calendar-face i { position: absolute; bottom: 1.3cqw; width: 36%; height: .3cqw; border-radius: 99px; background: #c9c0dd; }
 .study-calendar:not(:disabled):hover .calendar-paper { transform: rotate(-3deg); }
-.study-calendar:not(:disabled)::after { content: ''; position: absolute; inset: -5px; border: 2px dashed #ffd18c; border-radius: .5rem; }
+.calendar-assembly:has(.study-calendar:not(:disabled))::after { content: ''; position: absolute; left: 83.8%; top: 9%; width: 15%; height: 37.5%; border: .3cqw solid #e75b70; border-radius: 1.2cqw; box-sizing: border-box; pointer-events: none; }
 .is-tearing .calendar-paper { animation: rip-day 1.1s ease-in forwards; }
 .is-tearing .calendar-under { z-index: 1; } /* Reveal D-1 at the sound onset. */
 @keyframes rip-day { 20% { transform: rotate(-8deg) translateY(3%); } 45% { transform: rotate(7deg) translateY(16%); } 100% { transform: translate(-35%, 220%) rotate(30deg); opacity: 0; } }
-.thought { position: absolute; z-index: 2; opacity: 0; color: #ffe1e6; font: italic 1.6cqw Georgia, serif; text-shadow: 0 2px 12px #120710; pointer-events: none; transition: opacity 8s ease; }
-.thought-one { left: 9%; top: 21%; transform: rotate(-5deg); }
-.thought-two { left: 61%; top: 73%; transform: rotate(3deg); }
-.thought-three { left: 12%; top: 69%; transform: rotate(-3deg); }
+.thought { position: absolute; left: var(--x); top: var(--y); max-width: 36%; z-index: 2; visibility: hidden; opacity: 0; color: #ffe1e6; font: italic 1.9cqw/1.25 Georgia, serif; text-shadow: 0 2px 12px #120710; pointer-events: none; transform: translateY(.6cqw) rotate(var(--angle)); transition: opacity 1.3s ease, transform 1.3s ease; }
+.study-page[data-day="2"] .thought { display: none; opacity: 0; transition: none; }
+.study-page[data-day="1"] .thought.is-visible { visibility: visible; opacity: .92; transform: translateY(0) rotate(var(--angle)); }
+.thought-loud { color: #ffb8c5; font: 700 2.7cqw/1.1 'Bricolage Grotesque', 'Segoe UI', sans-serif; letter-spacing: -.03em; }
 .study-page[data-day="1"] .room-image { filter: brightness(.40) saturate(.55); }
 .study-page[data-day="1"] .study-boy { filter: brightness(.40) saturate(.55); }
 .study-page[data-day="1"] .pressure-shade { opacity: 1; }
 .study-page[data-day="1"] .study-screen { background: #302031; }
-.study-page[data-day="1"] .thought-one { opacity: .85; }
-.study-page[data-day="1"] .thought-two { opacity: .8; transition-delay: 4s; }
-.study-page[data-day="1"] .thought-three { opacity: .7; transition-delay: 8s; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 .audio-status { position: fixed; z-index: 50; right: 1rem; top: 3.5rem; max-width: min(28rem, 90vw); padding: .6rem .8rem; border-radius: .5rem; background: #191527ee; font-size: .8rem; color: #ffbdb4; }
 .audio-status:empty { display: none; }

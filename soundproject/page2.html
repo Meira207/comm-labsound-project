@@ -34,17 +34,32 @@
     </div>
     <img class="room-image chair-foreground" src="media/study-room-no-calendar.png" alt="" aria-hidden="true" draggable="false">
     <div class="pressure-shade" aria-hidden="true"></div>
-    <div class="thought thought-one" aria-hidden="true">How much do I remember?</div>
-    <div class="thought thought-two" aria-hidden="true">There’s too much left.</div>
-    <div class="thought thought-three" aria-hidden="true">I just read this.</div>
+    <div id="thought1" class="thought" style="--x:8%;--y:17%;--angle:-4deg" aria-hidden="true">How much do I remember?</div>
+    <div id="thought2" class="thought" style="--x:51%;--y:70%;--angle:3deg" aria-hidden="true">There’s too much left.</div>
+    <div id="thought3" class="thought" style="--x:12%;--y:64%;--angle:-3deg" aria-hidden="true">I just read this.</div>
+    <div id="thought4" class="thought" style="--x:37%;--y:29%;--angle:2deg" aria-hidden="true">Why isn’t it staying in?</div>
+    <div id="thought5" class="thought" style="--x:5%;--y:39%;--angle:-6deg" aria-hidden="true">One more chapter.</div>
+    <div id="thought6" class="thought" style="--x:58%;--y:48%;--angle:4deg" aria-hidden="true">The exam is tomorrow.</div>
+    <div id="thought7" class="thought" style="--x:27%;--y:79%;--angle:-2deg" aria-hidden="true">Everyone else is ready.</div>
+    <div id="thought8" class="thought" style="--x:43%;--y:12%;--angle:5deg" aria-hidden="true">What if I forget everything?</div>
+    <div id="thought9" class="thought thought-loud" style="--x:19%;--y:49%;--angle:-5deg" aria-hidden="true">I’m running out of time.</div>
+    <div id="thought10" class="thought" style="--x:6%;--y:85%;--angle:3deg" aria-hidden="true">I should have started sooner.</div>
+    <div id="thought11" class="thought" style="--x:55%;--y:85%;--angle:-3deg" aria-hidden="true">I can’t take a break.</div>
+    <div id="thought12" class="thought thought-loud" style="--x:35%;--y:39%;--angle:2deg" aria-hidden="true">READ IT AGAIN.</div>
+    <div id="thought13" class="thought" style="--x:10%;--y:29%;--angle:-2deg" aria-hidden="true">Did I skip something?</div>
+    <div id="thought14" class="thought" style="--x:52%;--y:59%;--angle:-4deg" aria-hidden="true">There’s another whole chapter.</div>
+    <div id="thought15" class="thought thought-loud" style="--x:24%;--y:61%;--angle:4deg" aria-hidden="true">I’M NOT READY.</div>
+    <div id="thought16" class="thought" style="--x:42%;--y:22%;--angle:-3deg" aria-hidden="true">What was the question?</div>
+    <div id="thought17" class="thought thought-loud" style="--x:9%;--y:73%;--angle:-4deg" aria-hidden="true">NOT ENOUGH TIME.</div>
+    <div id="thought18" class="thought thought-loud" style="--x:40%;--y:52%;--angle:3deg" aria-hidden="true">I JUST READ THIS.</div>
     <button id="bookHotspot" class="study-object study-object-book" type="button" aria-label="Open the book and listen to the pages" disabled></button>
     <button id="laptopHotspot" class="study-object study-object-laptop" type="button" aria-label="Add the sound of slow laptop typing" disabled></button>
     <button id="pencilHotspot" class="study-object study-object-pencil" type="button" aria-label="Add the sound of pencil writing" disabled></button>
     <div id="calendarAssembly" class="calendar-assembly">
       <img class="calendar-art" src="media/study-calendar.svg" alt="" aria-hidden="true" draggable="false">
       <button id="calendarHotspot" class="study-calendar" type="button" aria-label="D-2. Explore the book, laptop and pencil to unlock the calendar" disabled>
-        <span class="calendar-face calendar-under" aria-hidden="true"><strong>D-1</strong><span>day left</span></span>
-        <span class="calendar-face calendar-paper" aria-hidden="true"><strong>D-2</strong><span>days left</span><i></i></span>
+        <span class="calendar-face calendar-under" aria-hidden="true"><strong>1</strong><span>day left</span><i></i></span>
+        <span class="calendar-face calendar-paper" aria-hidden="true"><strong>2</strong><span>days left</span><i></i></span>
       </button>
     </div>
   </main>
