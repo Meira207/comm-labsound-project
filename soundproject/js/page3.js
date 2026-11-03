@@ -53,8 +53,8 @@ function startExam() {
   stage.style.opacity = 1;
 
   beginTitle.textContent = 'Exam Day';
-  beginSubtitle.textContent = "You're just minutes away from relief... finish your exam";
-  beginButton.textContent = 'Begin';
+  beginSubtitle.textContent = "Only seconds away from relief... It'll all be over soon";
+  beginButton.textContent = 'Finish Exam';
 
   classroomBackground.src = 'media/classroom1.png';
 
@@ -69,15 +69,15 @@ function startExam() {
   roomSound.currentTime = 0;
   roomSound.play().catch(function () { });
 
-  showCaption("Okay, let's finish this", true);
+  showCaption("Last question, here it goes...", true);
 
   deepBreathSound.addEventListener('ended', function () {
     examHotspot.classList.add('is-active');
   }, { once: true });
 
   setTimeout(function () {
-  playEffect(deepBreathSound, 1);
-}, 1000);
+    playEffect(deepBreathSound, 1);
+  }, 1000);
 }
 
 examHotspot.addEventListener('click', finishExam);
@@ -103,7 +103,7 @@ function showSubmissionScene() {
   teacher.classList.add('is-visible');
   examPaper.classList.add('is-visible');
 
-  showCaption('Submit the paper to the teacher', true);
+  showCaption("Let's hand it in!", true);
 }
 
 
@@ -193,9 +193,9 @@ function showEndingScreen() {
   stage.style.opacity = 0;
 
   setTimeout(function () {
-    beginTitle.textContent = 'The stress is over';
-    beginSubtitle.textContent = '';
-    beginButton.textContent = 'Start Over';
+    beginTitle.textContent = "Time's Up. You're Free!";
+    beginSubtitle.textContent = 'The waiting, studying, and worrying are finally behind you.';
+    beginButton.textContent = 'Experience Again';
 
     beginScreen.classList.remove('is-gone');
   }, 800);
