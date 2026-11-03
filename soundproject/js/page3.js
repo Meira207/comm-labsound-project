@@ -178,7 +178,7 @@ function showFinalScene() {
 
   showCaption('', false);
 
-  setTimeout(showEndingScreen, 6000);
+  setTimeout(showEndingScreen, 4000);
 }
 
 function showEndingScreen() {
@@ -196,6 +196,6 @@ function showEndingScreen() {
   }, 800);
 
   beginButton.onclick = function () {
-  window.location.href = 'index.html';
-};
+    window.location.href = 'index.html';
+  };
 }
