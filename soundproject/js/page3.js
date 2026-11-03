@@ -167,7 +167,7 @@ function submitPaper() {
   showCaption('', false);
 
   submissionSound.addEventListener('ended', function () {
-    showFinalScene();
+    setTimeout(showFinalScene, 1000);
   }, { once: true });
 
   playEffect(submissionSound, 1);
