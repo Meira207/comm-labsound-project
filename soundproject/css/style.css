@@ -87,11 +87,11 @@ a {
 
 .stage {
   position: fixed;
-  left: 50%;
-  top: 50%;
-  width: min(100vw, 177.78vh);
-  aspect-ratio: 16 / 9;
-  transform: translate(-50%, -50%);
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  aspect-ratio: auto;
   background: #1d1939;
   overflow: hidden;
 }
@@ -101,7 +101,8 @@ a {
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  /* Scale the whole scene with its percentage-positioned interactive layers. */
+  object-fit: fill;
   display: block;
   user-select: none;
   pointer-events: none;
