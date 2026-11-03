@@ -8,13 +8,29 @@
 .study-page button:disabled { cursor: default; opacity: .5; }
 .study-page button:focus-visible, .study-page a:focus-visible { outline: 3px solid #ffcf85; outline-offset: 5px; }
 .study-stage { position: relative; left: auto; top: auto; transform: none; margin: 5rem auto 0; width: min(100%, 1200px); container-type: inline-size; }
-.study-stage .room-image { transition: filter 8s ease; }
+.study-stage .room-image, .study-boy { transition: filter 2s ease; }
+.study-boy { position: absolute; inset: 0; pointer-events: none; transform-origin: 48% 81%; }
+.boy-sprite { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; user-select: none; pointer-events: none; }
+/* Keep the complete boy in one sprite so the shoulders cannot split apart. */
+.chair-foreground { clip-path: polygon(40.7% 100%, 40.7% 84%, 41.1% 82%, 42.1% 81%, 52.6% 81%, 53.7% 82%, 54.3% 84%, 54.3% 100%); }
+.is-studying .study-boy { animation: study-breathe 4s ease-in-out infinite; }
+.is-studying[data-day="1"] .study-boy { animation: stressed-study 1.1s ease-in-out infinite; }
+.motion-paused .study-boy { animation-play-state: paused; }
+@keyframes study-breathe {
+  0%, 100% { transform: translateY(0) rotate(-.15deg); }
+  50% { transform: translateY(-.14cqw) rotate(.2deg); }
+}
+@keyframes stressed-study {
+  0%, 100% { transform: translate(0, .12cqw) rotate(-.35deg); }
+  35% { transform: translate(-.08cqw, -.08cqw) rotate(.4deg); }
+  70% { transform: translate(.08cqw, .05cqw) rotate(-.1deg); }
+}
 .study-screen { position: absolute; left: 43.7%; top: 30%; width: 32.5%; height: 32.5%; padding: 2.1cqw 2.4cqw; overflow: hidden; background: #22243c; color: #e4dccb; border-radius: 3px; box-shadow: inset 0 0 4cqw #101321; }
 .screen-label { font-size: .65cqw; letter-spacing: .18em; color: #c2ad83; }
 .study-screen h2 { font-size: 1.7cqw; font-weight: 400; margin: 1cqw 0 1.6cqw; font-family: Georgia, serif; }
 .study-lines { width: 90%; height: 5cqw; background: repeating-linear-gradient(transparent 0 1cqw, #8c8da54a 1cqw 1.14cqw); }
 .study-screen p { font-size: .8cqw; color: #b6afc6; }
-.pressure-shade { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 51% 58%, transparent 12%, #340a28b0 100%); opacity: 0; transition: opacity 9s ease; }
+.pressure-shade { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 51% 65%, transparent 8%, #100917dc 100%); opacity: 0; transition: opacity 2s ease; }
 .study-calendar { position: absolute; left: 85.4%; top: 18.5%; width: 11.5%; height: 23.7%; padding: 0; border: 0; background: #ece8f7; color: #1a1636; border-radius: 0 0 .5cqw .5cqw; }
 .calendar-face { position: absolute; inset: 0; display: flex; align-items: center; flex-direction: column; background: #ece8f7; border-radius: inherit; padding-top: 1.1cqw; }
 .calendar-face strong { font-size: 4.3cqw; line-height: 1.2; letter-spacing: -.06em; }
@@ -30,7 +46,8 @@
 .thought-one { left: 9%; top: 21%; transform: rotate(-5deg); }
 .thought-two { left: 61%; top: 73%; transform: rotate(3deg); }
 .thought-three { left: 12%; top: 69%; transform: rotate(-3deg); }
-.study-page[data-day="1"] .room-image { filter: brightness(.64) saturate(.7); }
+.study-page[data-day="1"] .room-image { filter: brightness(.40) saturate(.55); }
+.study-page[data-day="1"] .study-boy { filter: brightness(.40) saturate(.55); }
 .study-page[data-day="1"] .pressure-shade { opacity: 1; }
 .study-page[data-day="1"] .study-screen { background: #302031; }
 .study-page[data-day="1"] .thought-one { opacity: .85; }

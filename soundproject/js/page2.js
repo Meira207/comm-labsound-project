@@ -3,19 +3,26 @@ const RECORDINGS = {
   room: 'audio/Real_room_ambience.WAV',
   piano: 'audio/Piano_playing.m4a',
   paper: 'audio/calendar_sound.mp3',
-  writing: 'audio/Writing.WAV',
   slowTyping: 'audio/Slow_typing.WAV',
   fastWriting: 'audio/Fast_writing.WAV',
+  fastestWriting: 'audio/Fastest_writing.WAV',
   fastTyping: 'audio/Fast_typing.WAV',
   flipping: 'audio/Fast_page_flipping.WAV',
   pressure: 'audio/Pressure_builds_up.WAV',
   notification: 'audio/Notification.WAV'
 };
+const INTENSE_RECORDINGS = new Set(['fastWriting', 'fastestWriting', 'fastTyping', 'flipping', 'pressure', 'notification']);
 const $ = (id) => document.getElementById(id);
 const buffers = new Map();
 const playing = new Set();
 const layers = new Map();
 const timers = new Set();
+const mediaTracks = new Map(Object.entries(RECORDINGS).map(([name, path]) => {
+  const audio = new Audio(path);
+  audio.preload = 'auto';
+  return [name, audio];
+}));
+const mediaPlaying = new Map();
 let context;
 let master;
 let loading;
@@ -38,13 +45,22 @@ function audioProblem(message = 'Some audio could not load. Check your connectio
 }
 
 async function prepareSound() {
+  // fetch(file://...) is blocked by browsers, but native audio can play it.
+  if (window.location.protocol === 'file:') return;
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   context = context || new AudioContextClass({ latencyHint: 'interactive' });
   if (!master) {
     // Leave headroom when multiple recorded layers overlap.
     master = context.createGain();
     master.gain.value = muted ? 0 : .7;
-    master.connect(context.destination);
+    const limiter = context.createDynamicsCompressor();
+    limiter.threshold.value = -6;
+    limiter.knee.value = 6;
+    limiter.ratio.value = 12;
+    limiter.attack.value = .003;
+    limiter.release.value = .18;
+    master.connect(limiter);
+    limiter.connect(context.destination);
   }
   await context.resume();
   loading = loading || Promise.allSettled(Object.entries(RECORDINGS).map(async ([name, path]) => {
@@ -57,12 +73,76 @@ async function prepareSound() {
   const results = await loading;
   if (results.some((result) => result.status === 'rejected')) {
     loading = null; // A replay retries missing assets, retaining successful buffers.
-    audioProblem();
+    // Missing decoded buffers use native audio instead of leaving a silent layer.
   }
 }
 
+function unlockMedia() {
+  // Run directly inside Begin's gesture, before asynchronous loading/decoding.
+  mediaTracks.forEach((audio, name) => {
+    if (mediaPlaying.has(name)) return;
+    audio.volume = 0;
+    audio.play().then(() => {
+      if (!mediaPlaying.has(name)) {
+        audio.pause();
+        audio.currentTime = 0;
+      }
+    }).catch(() => {});
+  });
+}
+
+function fadeMedia(entry, target, seconds, stop = false) {
+  clearInterval(entry.fadeTimer);
+  const from = entry.volume;
+  const start = performance.now();
+  entry.fadeTimer = setInterval(() => {
+    const progress = Math.min(1, (performance.now() - start) / (seconds * 1000));
+    entry.volume = from + (target - from) * progress;
+    entry.audio.volume = Math.max(0, Math.min(1, entry.volume * .7));
+    if (progress >= 1) {
+      clearInterval(entry.fadeTimer);
+      if (stop) entry.source.stop();
+    }
+  }, 25);
+}
+
+function playMedia(name, volume, loop, fadeSeconds) {
+  const audio = mediaTracks.get(name);
+  if (!audio) return;
+  if (mediaPlaying.has(name)) mediaPlaying.get(name).source.stop();
+  const entry = { audio, volume: fadeSeconds ? 0 : volume };
+  const cleanup = () => {
+    clearInterval(entry.fadeTimer);
+    playing.delete(entry);
+    if (layers.get(name) === entry) layers.delete(name);
+    if (mediaPlaying.get(name) === entry) mediaPlaying.delete(name);
+  };
+  entry.source = { stop() { audio.pause(); cleanup(); } };
+  playing.add(entry);
+  mediaPlaying.set(name, entry);
+  if (loop) layers.set(name, entry);
+  audio.loop = loop;
+  audio.muted = muted;
+  audio.volume = entry.volume * .7;
+  audio.currentTime = 0;
+  audio.onended = cleanup;
+  audio.play().then(() => {
+    // A replay/navigation may have cancelled this pending playback attempt.
+    if (mediaPlaying.get(name) !== entry && !mediaPlaying.has(name)) audio.pause();
+  }).catch(() => {
+    if (mediaPlaying.get(name) !== entry) return;
+    cleanup();
+    audioProblem(`Could not play ${name.replace(/([A-Z])/g, ' $1').toLowerCase()}. Check that the audio files are available, then try Start over.`);
+  });
+  if (fadeSeconds) fadeMedia(entry, volume, fadeSeconds);
+}
+
 function play(name, volume, loop = false, fadeSeconds = 0) {
-  if (!context || !buffers.has(name)) return;
+  if (day !== 1 && INTENSE_RECORDINGS.has(name)) return;
+  if (!context || !master || !buffers.has(name)) {
+    playMedia(name, volume, loop, fadeSeconds);
+    return;
+  }
   const source = context.createBufferSource();
   const gain = context.createGain();
   source.buffer = buffers.get(name);
@@ -86,6 +166,10 @@ function play(name, volume, loop = false, fadeSeconds = 0) {
 function fadeLayer(name, volume, seconds, stop = false) {
   const layer = layers.get(name);
   if (!layer) return;
+  if (layer.audio) {
+    fadeMedia(layer, volume, seconds, stop);
+    return;
+  }
   layer.gain.gain.cancelAndHoldAtTime(context.currentTime);
   layer.gain.gain.linearRampToValueAtTime(volume, context.currentTime + seconds);
   if (stop) layer.source.stop(context.currentTime + seconds + .05);
@@ -93,6 +177,7 @@ function fadeLayer(name, volume, seconds, stop = false) {
 
 function setMuted(value) {
   muted = value;
+  mediaTracks.forEach((audio) => { audio.muted = muted; });
   if (master) master.gain.setTargetAtTime(muted ? 0 : .7, context.currentTime, .03);
   $('muteButton').textContent = muted ? 'Unmute sound' : 'Mute sound';
   $('muteButton').setAttribute('aria-pressed', String(muted));
@@ -102,34 +187,32 @@ async function startExperience() {
   if (started) return;
   started = true;
   const currentGeneration = ++generation;
+  unlockMedia();
   $('beginButton').disabled = true;
   $('beginButton').textContent = 'Loading sounds…';
   $('audioStatus').textContent = '';
   try { await prepareSound(); }
-  catch { audioProblem('Sound is unavailable in this browser. The calendar and captions still work.'); }
+  catch { /* Native audio remains available if Web Audio cannot initialize. */ }
   if (currentGeneration !== generation) return;
   if (context && document.hidden) await context.suspend();
   $('beginScreen').classList.add('is-gone');
   $('beginScreen').inert = true;
+  document.body.classList.add('is-studying');
   $('calendarHotspot').disabled = $('tearButton').disabled = false;
   $('muteButton').disabled = $('replayButton').disabled = false;
-  play('room', .28, true, 2);
-  play('piano', .10, true, 3);
-  play('writing', .30, true, 2);
-  play('slowTyping', .10, true, 4);
+  play('room', .24, true, 2);
+  play('piano', .12, true, 3);
+  play('slowTyping', .22, true, 2);
   $('caption').textContent = 'Two days. One chapter at a time. I can do this.';
-  $('soundCaption').textContent = '[Quiet room, soft piano, steady writing and slow typing]';
+  $('soundCaption').textContent = '[Quiet room, soft piano and slow, measured typing]';
   $('tearButton').focus({ preventScroll: true });
 }
 
 function stressCue() {
   if (!started || day !== 1) return;
-  // Avoid piling up repeated one-shots when the visitor switches tabs.
-  if (!document.hidden) play('flipping', .24);
-  later(() => {
-    if (!document.hidden) play('notification', .18);
-  }, 4500);
-  later(stressCue, 16000);
+  // This recording lasts about 17 seconds; leave space between notifications.
+  if (!document.hidden) play('notification', .30);
+  later(stressCue, 22000);
 }
 
 function tearCalendar() {
@@ -143,17 +226,22 @@ function tearCalendar() {
   document.body.dataset.day = '1';
   $('calendarHotspot').setAttribute('aria-label', 'D-1. One day left until the exam');
   $('dayLabel').textContent = 'D-1 / RUNNING OUT OF TIME';
-  $('screenThought').textContent = 'Read. Reread. Why can’t I remember?';
   $('caption').textContent = 'One day? But I’ve barely started.';
-  $('soundCaption').textContent = '[Writing and typing quicken. Pages rustle. Pressure builds.]';
-  fadeLayer('piano', 0, 5, true);
-  fadeLayer('writing', 0, 3, true);
-  fadeLayer('slowTyping', 0, 3, true);
-  fadeLayer('room', .18, 8);
-  play('fastWriting', .38, true, 4);
-  play('fastTyping', .24, true, 9);
-  play('pressure', .32, true, 18);
-  later(stressCue, 6500);
+  $('soundCaption').textContent = '[Rapid writing, frantic typing, constant page flipping. The pressure swells.]';
+  fadeLayer('piano', 0, .8, true);
+  fadeLayer('slowTyping', 0, .5, true);
+  fadeLayer('room', .10, 2);
+  play('fastWriting', .65, true, .4);
+  play('fastTyping', .55, true, .6);
+  play('flipping', .40, true, 1);
+  play('pressure', .70, true, 4);
+  later(() => {
+    if (day !== 1) return;
+    fadeLayer('fastWriting', 0, 2, true);
+    play('fastestWriting', .75, true, 2);
+    $('soundCaption').textContent = '[Writing becomes frantic. Typing, pages and notifications crowd the room.]';
+  }, 6000);
+  later(stressCue, 3000);
   $('tearButton').hidden = true;
   $('continueLink').hidden = false;
   $('continueLink').focus({ preventScroll: true });
@@ -163,12 +251,14 @@ function tearCalendar() {
 }
 
 function stopSound() {
+  document.body.classList.remove('is-studying');
   ++generation;
   timers.forEach(clearTimeout);
   timers.clear();
   playing.forEach(({ source }) => source.stop());
   playing.clear();
   layers.clear();
+  mediaTracks.forEach((audio) => audio.pause());
   if (context) context.suspend().catch(() => {});
 }
 
@@ -180,7 +270,6 @@ function replay() {
   $('calendarHotspot').classList.remove('is-tearing');
   $('calendarHotspot').setAttribute('aria-label', 'D-2. Tear off the calendar page to reveal D-1');
   $('dayLabel').textContent = 'D-2 / THERE’S STILL TIME';
-  $('screenThought').textContent = 'Read. Understand. Remember.';
   $('calendarHotspot').disabled = $('tearButton').disabled = true;
   $('replayButton').disabled = true;
   $('tearButton').hidden = false;
@@ -194,8 +283,13 @@ $('tearButton').addEventListener('click', tearCalendar);
 $('muteButton').addEventListener('click', () => setMuted(!muted));
 $('replayButton').addEventListener('click', replay);
 document.addEventListener('visibilitychange', () => {
-  if (!started || !context) return;
-  (document.hidden ? context.suspend() : context.resume()).catch(() => audioProblem());
+  document.body.classList.toggle('motion-paused', document.hidden);
+  if (!started) return;
+  mediaPlaying.forEach(({ audio }) => {
+    if (document.hidden) audio.pause();
+    else audio.play().catch(() => audioProblem('Audio could not resume. Try Start over.'));
+  });
+  if (context) (document.hidden ? context.suspend() : context.resume()).catch(() => audioProblem());
 });
 window.addEventListener('pagehide', stopSound);
 window.addEventListener('pageshow', (event) => {
