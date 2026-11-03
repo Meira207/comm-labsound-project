@@ -65,7 +65,7 @@ function startExam() {
   examHotspot.disabled = false;
   examHotspot.classList.remove('is-active');
 
-  roomSound.volume = 0.6;
+  roomSound.volume = 0.7;
   roomSound.currentTime = 0;
   roomSound.play().catch(function () { });
 
@@ -76,7 +76,7 @@ function startExam() {
   }, { once: true });
 
   setTimeout(function () {
-    playEffect(deepBreathSound, 1);
+    playEffect(deepBreathSound, 0.7);
   }, 1000);
 }
 
